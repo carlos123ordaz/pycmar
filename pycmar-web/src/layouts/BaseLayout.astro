@@ -9,15 +9,46 @@ interface Props {
   title?: string;
   description?: string;
   currentPath?: string;
+  ogImage?: string;
+  noIndex?: boolean;
 }
 
 const {
   title = 'Pycmar — Exportadores de Productos del Mar',
   description = 'Exportadores peruanos de productos del mar congelados de alta calidad. Pota, calamar, pescado, mariscos y más.',
   currentPath = Astro.url.pathname,
+  ogImage = '/og-image.png',
+  noIndex = false,
 } = Astro.props;
 
 const lang: Lang = Astro.locals.lang ?? 'es';
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? Astro.url.origin;
+const canonicalUrl = `${siteUrl}${currentPath}`;
+const fullOgImage  = `${siteUrl}${ogImage}`;
+
+const ogLocale = lang === 'zh' ? 'zh_CN' : lang === 'en' ? 'en_US' : 'es_PE';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Pycmar',
+  description: 'Exportadores peruanos de productos del mar congelados de alta calidad.',
+  url: siteUrl,
+  logo: `${siteUrl}/logo.png`,
+  image: fullOgImage,
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+51-987-486-981',
+    contactType: 'customer service',
+    availableLanguage: ['Spanish', 'English', 'Chinese'],
+  },
+  address: {
+    '@type': 'PostalAddress',
+    addressCountry: 'PE',
+  },
+  sameAs: [],
+};
 ---
 
 <!DOCTYPE html>
@@ -25,10 +56,43 @@ const lang: Lang = Astro.locals.lang ?? 'es';
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content={description} />
+  <meta name="theme-color" content="#0B1F3B" />
+
+  <!-- Primary SEO -->
   <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalUrl} />
+  {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content={canonicalUrl} />
+  <meta property="og:title"       content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image"       content={fullOgImage} />
+  <meta property="og:image:alt"   content="Pycmar — Productos del Mar" />
+  <meta property="og:site_name"   content="Pycmar" />
+  <meta property="og:locale"      content={ogLocale} />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image"       content={fullOgImage} />
+
+  <!-- Favicons -->
+  <link rel="icon"             type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon"             type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest"         href="/site.webmanifest" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
   <slot name="head" />
 </head>
 <body>
@@ -66,7 +130,6 @@ const lang: Lang = Astro.locals.lang ?? 'es';
       setTimeout(() => el.remove(), 2600);
     };
 
-    // Scroll → header scrolled class
     const hdr = document.querySelector('.header') as HTMLElement;
     if (hdr) {
       window.addEventListener('scroll', () => {

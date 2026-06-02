@@ -79,7 +79,6 @@ const catName = lang === 'es'
     if (badge) { badge.textContent = String(total); badge.style.display = 'flex'; }
     b.classList.add('added');
     setTimeout(() => b.classList.remove('added'), 1500);
-    if ((window as any).showToast) (window as any).showToast(`${name} agregado`);
     document.dispatchEvent(new CustomEvent('cart-updated'));
   }
   (window as any)._addToCart = _addToCart;

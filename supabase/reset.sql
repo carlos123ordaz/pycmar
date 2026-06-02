@@ -22,8 +22,8 @@ drop table if exists public.categories         cascade;
 drop table if exists public.profiles           cascade;
 drop table if exists public.contact_requests   cascade;
 
-delete from storage.objects  where bucket_id in ('product-images', 'category-images');
-delete from storage.buckets  where id        in ('product-images', 'category-images');
+-- NOTA: borrar los buckets manualmente en Supabase > Storage antes de continuar
+-- (product-images, category-images, vouchers) — no se pueden eliminar con SQL directo.
 
 
 -- ── 2. SCHEMA ────────────────────────────────────────────────
@@ -163,17 +163,25 @@ alter table public.contact_requests enable row level security;
 create policy "contact_requests_public_insert" on public.contact_requests for insert              with check (true);
 create policy "contact_requests_admin_all"     on public.contact_requests for all    to authenticated using (true) with check (true);
 
--- Pedidos (creados por el webhook de Stripe)
+-- Pedidos
 create table public.orders (
-  id                uuid primary key default uuid_generate_v4(),
-  payment_intent_id text unique not null,
-  amount            integer not null,           -- centimos PEN
-  currency          text not null default 'pen',
-  status            text not null default 'paid', -- paid | processing | shipped | delivered | cancelled
-  customer_email    text,
-  items             jsonb not null default '[]',
-  created_at        timestamptz default now(),
-  updated_at        timestamptz default now()
+  id                  uuid primary key default uuid_generate_v4(),
+  payment_intent_id   text unique,               -- solo Stripe; nullable para Yape/Transfer
+  payment_method      text not null default 'stripe', -- stripe | yape | transfer
+  amount              integer not null,           -- centimos PEN
+  currency            text not null default 'pen',
+  status              text not null default 'paid', -- paid | pending_payment | processing | shipped | delivered | cancelled
+  customer_email      text,
+  items               jsonb not null default '[]',
+  voucher_url         text,
+  billing_name        text,
+  billing_last_name   text,
+  billing_country     text,
+  billing_email       text,
+  billing_address     text,
+  billing_phone       text,
+  created_at          timestamptz default now(),
+  updated_at          timestamptz default now()
 );
 
 alter table public.orders enable row level security;
@@ -233,15 +241,29 @@ create table public.shipment_documents (
 alter table public.shipment_documents enable row level security;
 create policy "shipment_documents_admin_all" on public.shipment_documents for all to authenticated using (true) with check (true);
 
--- Storage
+-- Storage buckets (skip if already exist)
 insert into storage.buckets (id, name, public) values
   ('product-images',  'product-images',  true),
-  ('category-images', 'category-images', true);
+  ('category-images', 'category-images', true),
+  ('vouchers',        'vouchers',        true)
+on conflict (id) do nothing;
+
+-- Storage policies (drop first to avoid duplicate errors)
+do $$ begin
+  drop policy if exists "product_images_public_read"  on storage.objects;
+  drop policy if exists "product_images_admin_write"  on storage.objects;
+  drop policy if exists "category_images_public_read" on storage.objects;
+  drop policy if exists "category_images_admin_write" on storage.objects;
+  drop policy if exists "vouchers_anon_upload"        on storage.objects;
+  drop policy if exists "vouchers_public_read"        on storage.objects;
+end $$;
 
 create policy "product_images_public_read"   on storage.objects for select  using (bucket_id = 'product-images');
 create policy "product_images_admin_write"   on storage.objects for all     to authenticated using (bucket_id = 'product-images')  with check (bucket_id = 'product-images');
 create policy "category_images_public_read"  on storage.objects for select  using (bucket_id = 'category-images');
 create policy "category_images_admin_write"  on storage.objects for all     to authenticated using (bucket_id = 'category-images') with check (bucket_id = 'category-images');
+create policy "vouchers_anon_upload"         on storage.objects for insert  with check (bucket_id = 'vouchers');
+create policy "vouchers_public_read"         on storage.objects for select  using (bucket_id = 'vouchers');
 
 
 -- ── 3. SEED ──────────────────────────────────────────────────

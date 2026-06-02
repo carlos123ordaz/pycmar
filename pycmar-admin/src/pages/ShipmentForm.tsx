@@ -130,7 +130,7 @@ export default function ShipmentForm() {
               <option value="">— Sin pedido vinculado —</option>
               {orders.map(o => (
                 <option key={o.id} value={o.id}>
-                  {o.payment_intent_id.slice(0, 20)}… · S/ {(o.amount / 100).toFixed(2)} · {o.customer_email ?? 'sin email'}
+                  {o.payment_intent_id ? o.payment_intent_id.slice(0, 20) + '…' : o.id.slice(0, 8)} · S/ {(o.amount / 100).toFixed(2)} · {o.customer_email ?? 'sin email'}
                 </option>
               ))}
             </select>

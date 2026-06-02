@@ -291,7 +291,6 @@ const waMsg = encodeURIComponent(
     const total = cart.reduce((s, i) => s + i.qty, 0);
     const badge = document.getElementById('cart-count');
     if (badge) { badge.textContent = String(total); badge.style.display = 'flex'; }
-    if (window.showToast) window.showToast(`${qty} kg de ${productName} agregado`);
     document.dispatchEvent(new CustomEvent('cart-updated'));
   }
 

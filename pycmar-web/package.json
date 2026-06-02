@@ -20,6 +20,7 @@
     "astro": "^5.8.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "resend": "^6.12.4",
     "stripe": "^22.2.0"
   },
   "devDependencies": {

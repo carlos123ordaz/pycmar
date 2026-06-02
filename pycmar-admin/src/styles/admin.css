@@ -552,6 +552,7 @@ tbody td {
   white-space: nowrap;
 }
 
+.badge-yellow { background: rgba(234,179,8,.12);      color: #a16207; }
 .badge-green  { background: var(--accent-050);       color: var(--accent-600); }
 .badge-gray   { background: var(--mist);              color: var(--gray); }
 .badge-orange { background: var(--warning-light);     color: var(--warning); }

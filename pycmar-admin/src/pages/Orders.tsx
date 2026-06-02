@@ -4,20 +4,22 @@ import { supabase } from '../lib/supabase'
 import type { Order } from '../types'
 
 const STATUS_MAP = {
-  paid:       { label: 'Pagado',      cls: 'badge-green'  },
-  processing: { label: 'Procesando',  cls: 'badge-ocean'  },
-  shipped:    { label: 'Despachado',  cls: 'badge-purple' },
-  delivered:  { label: 'Entregado',   cls: 'badge-gray'   },
-  cancelled:  { label: 'Cancelado',   cls: 'badge-red'    },
+  pending_payment: { label: 'Por confirmar', cls: 'badge-yellow'  },
+  paid:            { label: 'Pagado',        cls: 'badge-green'   },
+  processing:      { label: 'Procesando',    cls: 'badge-ocean'   },
+  shipped:         { label: 'Despachado',    cls: 'badge-purple'  },
+  delivered:       { label: 'Entregado',     cls: 'badge-gray'    },
+  cancelled:       { label: 'Cancelado',     cls: 'badge-red'     },
 }
 
 const FILTERS = [
-  { key: 'all',        label: 'Todos'       },
-  { key: 'paid',       label: 'Pagado'      },
-  { key: 'processing', label: 'Procesando'  },
-  { key: 'shipped',    label: 'Despachado'  },
-  { key: 'delivered',  label: 'Entregado'   },
-  { key: 'cancelled',  label: 'Cancelado'   },
+  { key: 'all',             label: 'Todos'         },
+  { key: 'pending_payment', label: 'Por confirmar' },
+  { key: 'paid',            label: 'Pagado'        },
+  { key: 'processing',      label: 'Procesando'    },
+  { key: 'shipped',         label: 'Despachado'    },
+  { key: 'delivered',       label: 'Entregado'     },
+  { key: 'cancelled',       label: 'Cancelado'     },
 ]
 
 function fmtDate(d: string) {
@@ -26,7 +28,8 @@ function fmtDate(d: string) {
 function fmtSoles(centimos: number) {
   return `S/ ${(centimos / 100).toFixed(2)}`
 }
-function shortPi(pi: string) {
+function shortPi(pi: string | null) {
+  if (!pi) return '—'
   return pi.replace('pi_', '').slice(0, 12) + '…'
 }
 

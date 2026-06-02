@@ -4,19 +4,21 @@ import { supabase } from '../lib/supabase'
 import type { Order, Shipment } from '../types'
 
 const STATUS_MAP = {
-  paid:       { label: 'Pagado',      cls: 'badge-green'  },
-  processing: { label: 'Procesando',  cls: 'badge-ocean'  },
-  shipped:    { label: 'Despachado',  cls: 'badge-purple' },
-  delivered:  { label: 'Entregado',   cls: 'badge-gray'   },
-  cancelled:  { label: 'Cancelado',   cls: 'badge-red'    },
+  pending_payment: { label: 'Por confirmar', cls: 'badge-yellow'  },
+  paid:            { label: 'Pagado',        cls: 'badge-green'   },
+  processing:      { label: 'Procesando',    cls: 'badge-ocean'   },
+  shipped:         { label: 'Despachado',    cls: 'badge-purple'  },
+  delivered:       { label: 'Entregado',     cls: 'badge-gray'    },
+  cancelled:       { label: 'Cancelado',     cls: 'badge-red'     },
 }
 
 const ORDER_STATUSES = [
-  { value: 'paid',       label: 'Pagado'      },
-  { value: 'processing', label: 'Procesando'  },
-  { value: 'shipped',    label: 'Despachado'  },
-  { value: 'delivered',  label: 'Entregado'   },
-  { value: 'cancelled',  label: 'Cancelado'   },
+  { value: 'pending_payment', label: 'Por confirmar' },
+  { value: 'paid',            label: 'Pagado'        },
+  { value: 'processing',      label: 'Procesando'    },
+  { value: 'shipped',         label: 'Despachado'    },
+  { value: 'delivered',       label: 'Entregado'     },
+  { value: 'cancelled',       label: 'Cancelado'     },
 ]
 
 function fmtDate(d: string) {
@@ -92,14 +94,14 @@ export default function OrderDetail() {
           </button>
           <span style={{ color: 'var(--gray)' }}>/</span>
           <span style={{ fontFamily: 'monospace', fontSize: '.85rem', color: 'var(--gray)' }}>
-            {order.payment_intent_id.slice(0, 20)}…
+            {order.payment_intent_id ? order.payment_intent_id.slice(0, 20) + '…' : '—'}
           </span>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span className={`badge ${st.cls}`}>{st.label}</span>
           <select
             className="input"
-            style={{ padding: '6px 10px', fontSize: '.84rem', width: 'auto' }}
+            style={{ padding: '6px 10px', fontSize: '.84rem', width: 180 }}
             value={order.status}
             onChange={e => updateStatus(e.target.value)}
             disabled={saving}
