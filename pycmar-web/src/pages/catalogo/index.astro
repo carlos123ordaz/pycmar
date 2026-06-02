@@ -1,0 +1,304 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { createSupabaseServer } from '../../lib/supabase';
+import { t, catName } from '../../lib/i18n';
+import type { Product, Category } from '../../lib/types';
+
+const lang = Astro.locals.lang;
+const supabase = createSupabaseServer(Astro.cookies);
+
+const url = Astro.url;
+const catParam    = url.searchParams.get('categoria') ?? '';
+const tagParam    = url.searchParams.get('formato')   ?? '';
+const origenParam = url.searchParams.get('origen')    ?? '';
+const qParam      = url.searchParams.get('q')         ?? '';
+const sortParam   = url.searchParams.get('orden')     ?? 'featured';
+
+// Fetch categories
+const { data: categoriesData } = await supabase
+  .from('categories')
+  .select('*')
+  .order('order_index');
+
+// Fetch all active products (with category join for client-side cat filter)
+let query = supabase
+  .from('products')
+  .select('*, images:product_images(*), category:categories(name_es,name_en,slug)')
+  .eq('active', true);
+
+if (tagParam) query = (query as any).contains('tags', [tagParam]);
+if (qParam)   query = (query as any).or(`name_es.ilike.%${qParam}%,name_en.ilike.%${qParam}%`);
+
+if (sortParam === 'price_lo') query = (query as any).order('price', { ascending: true });
+else if (sortParam === 'price_hi') query = (query as any).order('price', { ascending: false });
+else if (sortParam === 'az') query = (query as any).order('name_es');
+else query = (query as any).order('featured', { ascending: false });
+
+const { data: productData } = await query;
+
+let products: Product[] = productData ?? [];
+
+// Client-side filters (since Supabase join filtering is unreliable)
+if (catParam)    products = products.filter(p => (p.category as any)?.slug === catParam);
+if (origenParam) products = products.filter(p => p.origin?.includes(origenParam));
+
+// Build distinct origin list from all products (unfiltered by origin)
+const allOrigins: string[] = [...new Set(
+  (productData ?? [])
+    .map((p: any) => p.origin)
+    .filter(Boolean)
+)].sort() as string[];
+
+const cats: Category[] = categoriesData ?? [];
+const formats = ['IQF', 'Bloque', 'Cocido', 'Prefrito'];
+
+// Build URL helpers
+function buildUrl(params: Record<string, string>) {
+  const p = new URLSearchParams();
+  if (params.categoria) p.set('categoria', params.categoria);
+  if (params.formato)   p.set('formato', params.formato);
+  if (params.origen)    p.set('origen', params.origen);
+  if (params.q)         p.set('q', params.q);
+  if (params.orden && params.orden !== 'featured') p.set('orden', params.orden);
+  const qs = p.toString();
+  return `/catalogo${qs ? '?' + qs : ''}`;
+}
+
+const currentParams = { categoria: catParam, formato: tagParam, origen: origenParam, q: qParam, orden: sortParam };
+
+const pageTitle = lang === 'es' ? 'Catálogo — Pycmar'
+  : lang === 'en' ? 'Catalog — Pycmar'
+  : '产品目录 — Pycmar';
+
+const labelFiltros = lang === 'zh' ? '筛选' : lang === 'en' ? 'Filters' : 'Filtros';
+const labelOrigin  = lang === 'zh' ? '产地' : lang === 'en' ? 'Origin' : 'Origen';
+const labelVerRes  = lang === 'zh' ? '查看结果' : lang === 'en' ? 'View results' : 'Ver resultados';
+---
+
+<BaseLayout title={pageTitle} currentPath="/catalogo">
+
+  <!-- Page header -->
+  <div class="catalog-head">
+    <div class="wrap">
+      <span class="eyebrow" style="display:block;margin-bottom:12px;">{t('nav_catalog', lang)}</span>
+      <h1 class="h2">{t('catalog_title', lang)}</h1>
+      <p class="lead" style="margin-top:10px;max-width:50ch;">{t('catalog_sub', lang)}</p>
+    </div>
+  </div>
+
+  <!-- Body: filters + grid -->
+  <div class="wrap section-tight">
+    <div class="catalog-layout">
+
+      <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+      <aside class="filters" id="filters-panel">
+
+        <!-- Mobile header (only visible on mobile) -->
+        <div class="mobile-filter-header" style="display:none;justify-content:space-between;align-items:center;margin-bottom:18px;">
+          <h3 class="h3">{labelFiltros}</h3>
+          <button class="icon-btn" id="filters-close-btn" aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <!-- Category -->
+        <div class="filter-block">
+          <h4>{t('filter_cat', lang)}</h4>
+          <a
+            href={buildUrl({ ...currentParams, categoria: '' })}
+            class:list={['filter-opt', { on: !catParam }]}
+            style="text-decoration:none;"
+          >
+            <span class="box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            </span>
+            {t('all', lang)}
+          </a>
+          {cats.map(cat => {
+            const active = catParam === cat.slug;
+            return (
+              <a
+                href={buildUrl({ ...currentParams, categoria: active ? '' : cat.slug })}
+                class:list={['filter-opt', { on: active }]}
+                style="text-decoration:none;"
+              >
+                <span class="box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                </span>
+                {catName(cat, lang)}
+              </a>
+            );
+          })}
+        </div>
+
+        <!-- Format -->
+        <div class="filter-block">
+          <h4>{t('filter_format', lang)}</h4>
+          {formats.map(fmt => {
+            const active = tagParam === fmt;
+            return (
+              <a
+                href={buildUrl({ ...currentParams, formato: active ? '' : fmt })}
+                class:list={['filter-opt', { on: active }]}
+                style="text-decoration:none;"
+              >
+                <span class="box">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                </span>
+                <span class={`tag tag-${fmt}`}>{fmt}</span>
+              </a>
+            );
+          })}
+        </div>
+
+        <!-- Origin -->
+        {allOrigins.length > 0 && (
+          <div class="filter-block">
+            <h4>{labelOrigin}</h4>
+            {allOrigins.map(origin => {
+              const active = origenParam === origin;
+              return (
+                <a
+                  href={buildUrl({ ...currentParams, origen: active ? '' : origin })}
+                  class:list={['filter-opt', { on: active }]}
+                  style="text-decoration:none;"
+                >
+                  <span class="box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                  </span>
+                  {origin}
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        <!-- Clear -->
+        <a href="/catalogo" class="btn btn-outline btn-sm btn-block" style="margin-top:18px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          {t('filter_clear', lang)}
+        </a>
+
+        <!-- Mobile: ver resultados -->
+        <a href="#" id="filters-apply-btn" class="btn btn-navy btn-block" style="margin-top:10px;display:none;">
+          {labelVerRes}
+        </a>
+      </aside>
+
+      <!-- ── PRODUCTS ─────────────────────────────────────────── -->
+      <div>
+
+        <!-- Toolbar -->
+        <div class="catalog-bar">
+          <div class="row" style="gap:14px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm mobile-filter-btn" id="filters-open-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
+              {labelFiltros}
+            </button>
+            <span class="ct"><b>{products.length}</b> {t('catalog_count', lang)}</span>
+          </div>
+          <div class="row" style="gap:9px;">
+            <span style="font-size:.88rem;color:var(--gray);font-weight:600;">{t('sort_label', lang)}</span>
+            <form method="get" action="/catalogo" style="margin:0;">
+              {catParam    && <input type="hidden" name="categoria" value={catParam} />}
+              {tagParam    && <input type="hidden" name="formato"   value={tagParam} />}
+              {origenParam && <input type="hidden" name="origen"    value={origenParam} />}
+              {qParam      && <input type="hidden" name="q"         value={qParam} />}
+              <select class="select" name="orden" onchange="this.form.submit()">
+                <option value="featured" selected={sortParam === 'featured'}>{t('sort_featured', lang)}</option>
+                <option value="az"       selected={sortParam === 'az'}      >{t('sort_az', lang)}</option>
+                <option value="price_lo" selected={sortParam === 'price_lo'}>{t('sort_price_lo', lang)}</option>
+                <option value="price_hi" selected={sortParam === 'price_hi'}>{t('sort_price_hi', lang)}</option>
+              </select>
+            </form>
+          </div>
+        </div>
+
+        <!-- Active filter chips -->
+        {(catParam || tagParam || origenParam || qParam) && (
+          <div class="chips-row">
+            {catParam && (
+              <a href={buildUrl({ ...currentParams, categoria: '' })} class="chip active">
+                {catName(cats.find(c => c.slug === catParam)! ?? { name_es: catParam, name_en: catParam }, lang)}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </a>
+            )}
+            {tagParam && (
+              <a href={buildUrl({ ...currentParams, formato: '' })} class="chip active">
+                {tagParam}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </a>
+            )}
+            {origenParam && (
+              <a href={buildUrl({ ...currentParams, origen: '' })} class="chip active">
+                {origenParam}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </a>
+            )}
+            {qParam && (
+              <a href={buildUrl({ ...currentParams, q: '' })} class="chip active">
+                "{qParam}"
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </a>
+            )}
+            <a href="/catalogo" class="chip">{t('filter_clear', lang)}</a>
+          </div>
+        )}
+
+        <!-- Grid -->
+        {products.length === 0 ? (
+          <div class="center" style="padding:70px 0;color:var(--gray);">
+            <p style="margin-bottom:16px;">{t('no_results', lang)}</p>
+            <a href="/catalogo" class="btn btn-outline">{t('filter_clear', lang)}</a>
+          </div>
+        ) : (
+          <div class="prod-grid cols3">
+            {products.map(p => <ProductCard product={p} lang={lang} />)}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+
+</BaseLayout>
+
+<script>
+  const openBtn  = document.getElementById('filters-open-btn');
+  const closeBtn = document.getElementById('filters-close-btn');
+  const applyBtn = document.getElementById('filters-apply-btn');
+  const panel    = document.getElementById('filters-panel');
+  const mobileHeader = panel?.querySelector('.mobile-filter-header') as HTMLElement | null;
+
+  function openFilters() {
+    panel?.classList.add('open');
+    if (mobileHeader) mobileHeader.style.display = 'flex';
+    if (applyBtn) applyBtn.style.display = 'block';
+  }
+  function closeFilters() {
+    panel?.classList.remove('open');
+    if (mobileHeader) mobileHeader.style.display = 'none';
+    if (applyBtn) applyBtn.style.display = 'none';
+  }
+
+  openBtn?.addEventListener('click', openFilters);
+  closeBtn?.addEventListener('click', closeFilters);
+  applyBtn?.addEventListener('click', (e) => { e.preventDefault(); closeFilters(); });
+
+  // Close on overlay click (when panel is open as fixed overlay)
+  document.addEventListener('click', (e) => {
+    if (panel?.classList.contains('open') && !panel.contains(e.target as Node) && e.target !== openBtn) {
+      closeFilters();
+    }
+  });
+</script>
+
+<style>
+  @media(max-width:900px) {
+    .catalog-layout { grid-template-columns: 1fr !important; }
+    .prod-grid.cols3 { grid-template-columns: repeat(2,1fr) !important; }
+  }
+  @media(max-width:560px) {
+    .prod-grid.cols3 { grid-template-columns: 1fr !important; }
+  }
+</style>

@@ -1,0 +1,207 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../lib/i18n';
+
+const lang = Astro.locals.lang;
+
+const countries = lang === 'es'
+  ? ['Perú','China','Estados Unidos','España','Japón','Italia','Corea del Sur','Otro']
+  : lang === 'zh'
+  ? ['中国','秘鲁','美国','西班牙','日本','意大利','韩国','其他']
+  : ['Peru','China','United States','Spain','Japan','Italy','South Korea','Other'];
+
+const volumes = [t('vol_1', lang), t('vol_2', lang), t('vol_3', lang), t('vol_4', lang)];
+
+const pageTitle = lang === 'es' ? 'Contacto — Pycmar'
+  : lang === 'en' ? 'Contact — Pycmar'
+  : '联系我们 — Pycmar';
+---
+
+<BaseLayout title={pageTitle} currentPath="/contacto">
+
+  <!-- Page header -->
+  <section class="section-tight" style="background:var(--mist);border-bottom:1px solid var(--line);">
+    <div class="wrap">
+      <span class="eyebrow" style="display:block;margin-bottom:12px;">{t('nav_contact', lang)}</span>
+      <h1 class="h2">{t('contact_title', lang)}</h1>
+      <p class="lead" style="margin-top:10px;max-width:46ch;">{t('contact_sub', lang)}</p>
+    </div>
+  </section>
+
+  <!-- Form + info -->
+  <section class="section">
+    <div class="wrap">
+      <div style="display:grid;grid-template-columns:1.3fr .9fr;gap:clamp(30px,5vw,56px);align-items:start;" class="contact-grid">
+
+        <!-- Form -->
+        <form id="contact-form" style="background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:clamp(24px,3vw,38px);box-shadow:var(--shadow-sm);">
+
+          <div id="form-success" style="display:none;text-align:center;padding:46px 30px;">
+            <div style="width:74px;height:74px;border-radius:50%;background:var(--accent-050);color:var(--accent-600);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <h3>{t('quote_ok', lang)}</h3>
+            <p style="color:var(--gray);margin:10px 0 22px;">{t('quote_ok_sub', lang)}</p>
+            <button type="button" class="btn btn-navy" id="reset-btn">{t('send_another', lang)}</button>
+          </div>
+
+          <div id="form-body">
+            <div class="field-row">
+              <div class="field">
+                <label>{t('form_name', lang)} <span class="req">*</span></label>
+                <input name="nombre" type="text" required placeholder={lang === 'es' ? 'Ej. María Quispe' : lang === 'zh' ? '例如：王芳' : 'e.g. Maria Quispe'} />
+              </div>
+              <div class="field">
+                <label>{t('form_company', lang)}</label>
+                <input name="empresa" type="text" placeholder={lang === 'es' ? 'Ej. Ocean Foods S.A.' : lang === 'zh' ? '例如：海洋食品公司' : 'e.g. Ocean Foods Inc.'} />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>{t('form_email', lang)} <span class="req">*</span></label>
+                <input name="email" type="email" required placeholder="nombre@empresa.com" />
+              </div>
+              <div class="field">
+                <label>{t('form_country', lang)} <span class="req">*</span></label>
+                <select name="pais" required>
+                  <option value="" disabled selected>{lang === 'es' ? 'Seleccionar…' : lang === 'zh' ? '请选择…' : 'Select…'}</option>
+                  {countries.map(c => <option>{c}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>{t('form_type', lang)} <span class="req">*</span></label>
+              <div class="seg-radio">
+                <label>
+                  <input type="radio" name="tipo" value="b2c" />
+                  <span>{t('form_type_b2c', lang)}</span>
+                </label>
+                <label>
+                  <input type="radio" name="tipo" value="b2b" checked />
+                  <span>{t('form_type_b2b', lang)}</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field" id="volume-field">
+              <label>{t('form_volume', lang)}</label>
+              <select name="volumen">
+                <option value="" disabled selected>{t('vol_select', lang)}</option>
+                {volumes.map(v => <option>{v}</option>)}
+              </select>
+            </div>
+
+            <div class="field">
+              <label>{t('form_message', lang)}</label>
+              <textarea name="mensaje" placeholder={lang === 'es' ? 'Cuéntanos qué productos, formato y destino necesitas…' : lang === 'zh' ? '请告诉我们您需要什么产品、规格和目的地…' : 'Tell us which products, format and destination you need…'}></textarea>
+            </div>
+
+            <div id="form-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:.85em 1em;color:#991b1b;font-size:.9rem;margin-bottom:14px;"></div>
+
+            <button type="submit" class="btn btn-accent btn-block btn-lg" id="submit-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              {t('form_send', lang)}
+            </button>
+            <a
+              href="https://wa.me/51987486981?text=Hola%2C%20quisiera%20cotizar%20productos%20del%20mar"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-wa btn-block"
+              style="margin-top:12px;"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              {t('form_whatsapp', lang)}
+            </a>
+          </div>
+        </form>
+
+        <!-- Contact info -->
+        <div>
+          <div style="background:var(--navy);color:#fff;border-radius:var(--radius-lg);padding:30px;margin-bottom:18px;">
+            <div class="divider-chev">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+            <h3 style="color:#fff;margin:14px 0 18px;">{t('direct_contact', lang)}</h3>
+            <a class="footer-contact-item" href="mailto:Pycmarperu@gmail.com" style="margin-bottom:16px;color:#cfe0f1;text-decoration:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+              Pycmarperu@gmail.com
+            </a>
+            <a class="footer-contact-item" href="tel:+51987486981" style="margin-bottom:16px;color:#cfe0f1;text-decoration:none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.64A2 2 0 012 1h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+              +51 987 486 981
+            </a>
+            <div class="footer-contact-item" style="margin-bottom:0;color:#cfe0f1;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Lima · Paita · Perú
+            </div>
+          </div>
+
+          <div style="background:var(--mist);border:1px solid var(--line);border-radius:var(--radius-lg);padding:26px;">
+            <div class="bene-ic" style="margin-bottom:14px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="2" x2="12" y2="22"/><path d="M17 7l-5 5-5-5M17 17l-5-5-5 5"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+              </svg>
+            </div>
+            <h4 style="font-size:1.05rem;margin-bottom:8px;">{t('reply_24h', lang)}</h4>
+            <p class="muted" style="font-size:.92rem;">{t('reply_24h_sub', lang)}</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script>
+  document.getElementById('contact-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn') as HTMLButtonElement;
+    const errEl = document.getElementById('form-error')!;
+    btn.disabled = true;
+    btn.textContent = '…';
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        (document.getElementById('form-body') as HTMLElement).style.display = 'none';
+        (document.getElementById('form-success') as HTMLElement).style.display = 'block';
+      } else {
+        throw new Error();
+      }
+    } catch {
+      errEl.style.display = 'block';
+      errEl.textContent = 'Error al enviar. Por favor escríbenos por WhatsApp.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enviar solicitud';
+    }
+  });
+
+  document.getElementById('reset-btn')?.addEventListener('click', () => {
+    (document.getElementById('form-body') as HTMLElement).style.display = 'block';
+    (document.getElementById('form-success') as HTMLElement).style.display = 'none';
+    (document.getElementById('contact-form') as HTMLFormElement).reset();
+  });
+</script>
+
+<style>
+  @media(max-width:860px) {
+    .contact-grid { grid-template-columns: 1fr !important; }
+  }
+  @media(max-width:560px) {
+    .field-row { grid-template-columns: 1fr !important; }
+    .seg-radio { flex-direction: column; }
+  }
+</style>

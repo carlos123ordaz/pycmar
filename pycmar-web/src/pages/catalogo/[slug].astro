@@ -1,0 +1,318 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createSupabaseServer, getImageUrl } from '../../lib/supabase';
+import { t, pName, pBlurb, pDesc, catName } from '../../lib/i18n';
+import type { Product } from '../../lib/types';
+
+const lang = Astro.locals.lang;
+const { slug } = Astro.params;
+const supabase = createSupabaseServer(Astro.cookies);
+
+const { data } = await supabase
+  .from('products')
+  .select('*, images:product_images(*), category:categories(*)')
+  .eq('slug', slug)
+  .eq('active', true)
+  .single();
+
+if (!data) return Astro.redirect('/catalogo');
+
+const product: Product = data;
+const name = pName(product, lang);
+const blurb = pBlurb(product, lang);
+const images = product.images ?? [];
+const mainImg = images.find(i => i.is_main) ?? images[0] ?? null;
+const cat = product.category as any;
+
+const specs: [string, string][] = [
+  product.scientific_name ? ['spec_sci', product.scientific_name] : null,
+  product.fao_zone        ? ['spec_fao', `FAO ${product.fao_zone}`] : null,
+  product.origin          ? ['spec_origin', product.origin] : null,
+  product.tags.length     ? ['spec_format', product.tags.join(' · ')] : null,
+  product.presentation    ? ['spec_pres', product.presentation] : null,
+  product.measures        ? ['spec_measure', product.measures] : null,
+  product.sizing          ? ['spec_sizes', product.sizing] : null,
+  product.packaging       ? ['spec_pack', product.packaging] : null,
+].filter(Boolean) as [string, string][];
+
+const { data: relatedData } = await supabase
+  .from('products')
+  .select('*, images:product_images(*), category:categories(name_es,name_en,slug)')
+  .eq('category_id', product.category_id)
+  .eq('active', true)
+  .neq('id', product.id)
+  .limit(4);
+
+const related: Product[] = relatedData ?? [];
+
+const pageTitle = `${name} — Pycmar`;
+const waMsg = encodeURIComponent(
+  lang === 'es' ? `Hola PYCMAR, quiero cotizar: ${name}`
+  : lang === 'zh' ? `你好PYCMAR，我想询价：${name}`
+  : `Hi PYCMAR, I want a quote for: ${name}`
+);
+---
+
+<BaseLayout title={pageTitle} currentPath="/catalogo">
+
+  <!-- Breadcrumb -->
+  <div class="wrap">
+    <div class="crumbs">
+      <a href="/">{t('nav_home', lang)}</a>
+      <span class="sep">/</span>
+      <a href="/catalogo">{t('nav_catalog', lang)}</a>
+      <span class="sep">/</span>
+      {cat && (
+        <>
+          <a href={`/catalogo?categoria=${cat.slug}`}>{catName(cat, lang)}</a>
+          <span class="sep">/</span>
+        </>
+      )}
+      <span style="color:var(--navy);font-weight:600;">{name}</span>
+    </div>
+  </div>
+
+  <!-- Main PDP -->
+  <div class="wrap" style="padding-bottom:clamp(50px,7vw,90px);">
+    <div class="pdp">
+
+      <!-- Gallery -->
+      <div class="pdp-gallery" id="pdp-gallery">
+        <div class="pdp-main">
+          {mainImg
+            ? <img src={getImageUrl('product-images', mainImg.url)} alt={name} id="main-img" />
+            : <div class="ph" style="height:100%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="m21 15-5-5L5 21"/>
+                </svg>
+              </div>
+          }
+        </div>
+        {images.length > 1 && (
+          <div class="pdp-thumbs">
+            {images.map((img, idx) => (
+              <div
+                class:list={['pdp-thumb', { on: img.is_main || idx === 0 }]}
+                data-url={getImageUrl('product-images', img.url)}
+                onclick="selectThumb(this)"
+              >
+                <img src={getImageUrl('product-images', img.url)} alt={`${name} ${idx + 1}`} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- Info -->
+      <div class="pdp-info">
+        {product.scientific_name && product.scientific_name !== 'Mix' && (
+          <div class="sci">{product.scientific_name}</div>
+        )}
+        <h1>{name}</h1>
+        <div class="pdp-tags">
+          {product.tags.map(tg => <span class={`tag tag-${tg}`}>{tg}</span>)}
+          {product.origin && (
+            <span class="pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {product.origin}
+            </span>
+          )}
+        </div>
+
+        {blurb && <p class="pdp-blurb">{blurb}</p>}
+
+        {specs.length > 0 && (
+          <dl class="spec-table">
+            {specs.map(([key, val]) => (
+              <div class="spec-row">
+                <dt>{t(key, lang)}</dt>
+                <dd>{val}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        <!-- Buy box -->
+        <div class="pdp-buy">
+          <div class="buy-tabs">
+            <button class="buy-tab on" id="tab-buy-btn" onclick="switchTab('buy')">{t('tab_buy', lang)}</button>
+            <button class="buy-tab" id="tab-quote-btn" onclick="switchTab('quote')">{t('tab_quote', lang)}</button>
+          </div>
+
+          <!-- Buy panel -->
+          <div class="buy-panel" id="panel-buy">
+            <div class="buy-price">
+              <span class="v">S/ {product.price.toFixed(2)}</span>
+              <span class="u">/ {t('per_kg', lang)}</span>
+            </div>
+            <p class="buy-note">{t('buy_note', lang)}</p>
+            <div class="row" style="gap:16px;flex-wrap:wrap;margin-bottom:4px;">
+              <div class="qty">
+                <button onclick="changeQty(-1)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <input type="number" id="qty-input" value="10" min="1" onchange="updateTotal()" />
+                <button onclick="changeQty(1)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              <span style="color:var(--gray);font-size:.9rem;">
+                kg · <b style="color:var(--navy);" id="total-display">S/ {(product.price * 10).toFixed(2)}</b>
+              </span>
+            </div>
+            <div class="buy-actions">
+              <button
+                class="btn btn-accent"
+                id="add-cart-btn"
+                data-id={product.id}
+                data-name={name}
+                data-price={product.price}
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                {t('buy_now', lang)}
+              </button>
+              <button class="btn btn-outline" onclick="switchTab('quote')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                {t('add_quote', lang)}
+              </button>
+            </div>
+          </div>
+
+          <!-- Quote panel -->
+          <div class="buy-panel" id="panel-quote" style="display:none;">
+            <div class="buy-price">
+              <span class="v" style="font-size:1.5rem;">{t('quote_only', lang)}</span>
+            </div>
+            <p class="buy-note">{t('quote_note', lang)}</p>
+            <div class="row" style="gap:16px;flex-wrap:wrap;margin-bottom:4px;">
+              <div class="qty">
+                <button onclick="changeQty(-1)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+                <input type="number" id="qty-input-q" value="10" min="1" />
+                <button onclick="changeQty(1)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              <span style="color:var(--gray);font-size:.9rem;">kg {lang === 'es' ? 'estimados' : lang === 'zh' ? '估计' : 'estimated'}</span>
+            </div>
+            <div class="buy-actions">
+              <button class="btn btn-navy" id="add-quote-btn" data-id={product.id} data-name={name} data-price={product.price}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                {t('add_quote', lang)}
+              </button>
+              <a href={`https://wa.me/51987486981?text=${waMsg}`} target="_blank" rel="noopener" class="btn btn-wa">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related -->
+    {related.length > 0 && (
+      <div style="margin-top:clamp(50px,7vw,90px);">
+        <h2 class="h3" style="margin-bottom:24px;">{t('related', lang)}</h2>
+        <div class="prod-grid">
+          {related.map(p => (
+            <a href={`/catalogo/${p.slug}`} class="pcard" style="text-decoration:none;">
+              <div class="pcard-img">
+                <div class="ph" style="height:100%;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                </div>
+                <div class="pcard-tags">
+                  {p.tags.map(tg => <span class={`tag tag-${tg}`}>{tg}</span>)}
+                </div>
+              </div>
+              <div class="pcard-body">
+                <h3>{pName(p, lang)}</h3>
+                <div class="pcard-foot">
+                  <div class="price">
+                    <span class="v">S/ {p.price.toFixed(2)}</span>
+                    <span class="u">/ kg</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+
+</BaseLayout>
+
+<script define:vars={{ price: product.price, productId: product.id, productName: name }}>
+  function switchTab(tab) {
+    document.getElementById('tab-buy-btn').classList.toggle('on', tab === 'buy');
+    document.getElementById('tab-quote-btn').classList.toggle('on', tab === 'quote');
+    document.getElementById('panel-buy').style.display = tab === 'buy' ? '' : 'none';
+    document.getElementById('panel-quote').style.display = tab === 'quote' ? '' : 'none';
+  }
+
+  function changeQty(delta) {
+    const inp = document.getElementById('qty-input') || document.getElementById('qty-input-q');
+    if (!inp) return;
+    const newVal = Math.max(1, parseInt(inp.value || '1') + delta);
+    inp.value = newVal;
+    updateTotal();
+  }
+
+  function updateTotal() {
+    const inp = document.getElementById('qty-input');
+    if (!inp) return;
+    const q = Math.max(1, parseInt(inp.value) || 1);
+    const el = document.getElementById('total-display');
+    if (el) el.textContent = `S/ ${(price * q).toFixed(2)}`;
+  }
+
+  function selectThumb(el) {
+    const url = el.dataset.url;
+    const mainImg = document.getElementById('main-img');
+    if (mainImg) mainImg.src = url;
+    document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  function addToCartPDP(mode) {
+    const qInp = mode === 'buy'
+      ? document.getElementById('qty-input')
+      : document.getElementById('qty-input-q');
+    const qty = Math.max(1, parseInt(qInp?.value || '10') || 10);
+    const cart = JSON.parse(localStorage.getItem('pycmar_cart') || '[]');
+    const existing = cart.find(i => i.id === productId);
+    if (existing) { existing.qty += qty; }
+    else { cart.push({ id: productId, name: productName, price, qty, mode }); }
+    localStorage.setItem('pycmar_cart', JSON.stringify(cart));
+    const total = cart.reduce((s, i) => s + i.qty, 0);
+    const badge = document.getElementById('cart-count');
+    if (badge) { badge.textContent = String(total); badge.style.display = 'flex'; }
+    if (window.showToast) window.showToast(`${qty} kg de ${productName} agregado`);
+    document.dispatchEvent(new CustomEvent('cart-updated'));
+  }
+
+  document.getElementById('add-cart-btn')?.addEventListener('click', () => {
+    addToCartPDP('buy');
+    setTimeout(() => document.dispatchEvent(new CustomEvent('cart-open')), 80);
+  });
+  document.getElementById('add-quote-btn')?.addEventListener('click', () => {
+    addToCartPDP('quote');
+    setTimeout(() => document.dispatchEvent(new CustomEvent('cart-open')), 80);
+  });
+  window.switchTab = switchTab;
+  window.changeQty = changeQty;
+  window.updateTotal = updateTotal;
+  window.selectThumb = selectThumb;
+</script>
+
+<style>
+  @media(max-width:860px) {
+    .pdp { grid-template-columns: 1fr !important; }
+    .pdp-gallery { position: static !important; }
+    .prod-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
+</style>

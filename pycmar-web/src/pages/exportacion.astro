@@ -1,0 +1,197 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t, markets } from '../lib/i18n';
+
+const lang = Astro.locals.lang;
+
+const stepData = [
+  {
+    es_t:'Abastecimiento', en_t:'Sourcing', zh_t:'原料采购',
+    es_d:'Captura artesanal e industrial con control de origen y zona FAO documentada.',
+    en_d:'Artisanal and industrial catch with origin control and documented FAO zone.',
+    zh_d:'传统和工业捕捞，记录产地控制和FAO区域文件。',
+    icon: 1,
+  },
+  {
+    es_t:'Procesamiento', en_t:'Processing', zh_t:'加工处理',
+    es_d:'Fileteado, corte y clasificación en planta con habilitación HACCP y SANIPES.',
+    en_d:'Filleting, cutting and grading in HACCP & SANIPES-approved plants.',
+    zh_d:'在获得HACCP和SANIPES认证的工厂进行分切、分级和加工。',
+    icon: 2,
+  },
+  {
+    es_t:'Congelado IQF', en_t:'IQF Freezing', zh_t:'IQF冷冻',
+    es_d:'Congelado individual o en bloque a −18 °C, con glaseo a la carta.',
+    en_d:'Individual or block freezing at −18 °C, with customizable glazing.',
+    zh_d:'单冻或整块冷冻至-18°C，可定制上冰量。',
+    icon: 3,
+  },
+  {
+    es_t:'Logística & embarque', en_t:'Logistics & shipping', zh_t:'物流与装运',
+    es_d:'Contenedores reefer, documentación de exportación e Incoterms a medida.',
+    en_d:'Reefer containers, export documentation and tailored Incoterms.',
+    zh_d:'冷藏集装箱、出口文件和定制国际贸易术语。',
+    icon: 4,
+  },
+];
+
+const logiData = [
+  {
+    es_t:'Contenedores reefer', en_t:'Reefer containers', zh_t:'冷藏集装箱',
+    es_d:'Carga consolidada o FCL a −18 °C sin ruptura de cadena de frío.',
+    en_d:'Consolidated or FCL cargo at −18 °C with an unbroken cold chain.',
+    zh_d:'散装或整箱货物在-18°C下全程不断冷链。',
+    icon: 1,
+  },
+  {
+    es_t:'Documentación completa', en_t:'Full documentation', zh_t:'完整文件',
+    es_d:'Certificado sanitario, origen, packing list y trazabilidad por lote.',
+    en_d:'Health & origin certificates, packing list and batch traceability.',
+    zh_d:'卫生证书、产地证、装箱单及批次溯源。',
+    icon: 2,
+  },
+  {
+    es_t:'Incoterms a medida', en_t:'Tailored Incoterms', zh_t:'定制贸易条款',
+    es_d:'FOB, CFR o CIF según el destino y el acuerdo comercial.',
+    en_d:'FOB, CFR or CIF depending on destination and trade agreement.',
+    zh_d:'根据目的地和贸易协议提供FOB、CFR或CIF。',
+    icon: 3,
+  },
+  {
+    es_t:'Tercerización de planta', en_t:'Plant outsourcing', zh_t:'工厂委托加工',
+    es_d:'Gestión operativa integral para procesar a cualquier volumen.',
+    en_d:'End-to-end operational management to process at any volume.',
+    zh_d:'端到端运营管理，可处理任意规模的加工量。',
+    icon: 4,
+  },
+];
+
+const getT = (item: any) => lang === 'en' ? item.en_t : lang === 'zh' ? item.zh_t : item.es_t;
+const getD = (item: any) => lang === 'en' ? item.en_d : lang === 'zh' ? item.zh_d : item.es_d;
+
+const pageTitle = lang === 'es' ? 'Exportación — Pycmar'
+  : lang === 'en' ? 'Export — Pycmar'
+  : '出口业务 — Pycmar';
+---
+
+<BaseLayout title={pageTitle} currentPath="/exportacion">
+
+  <!-- Hero -->
+  <section class="export-hero">
+    <div class="wrap">
+      <span class="eyebrow on-dark">{t('export_eyebrow', lang)}</span>
+      <h1 class="display" style="margin:.3em 0 .4em;max-width:16ch;">{t('export_title', lang)}</h1>
+      <p class="lead">{t('export_sub', lang)}</p>
+      <div class="export-hero-stats">
+        {[
+          ['6',    lang === 'es' ? 'Continentes atendidos' : lang === 'zh' ? '服务大洲' : 'Markets served'],
+          ['−18°C', lang === 'es' ? 'Cadena de frío'       : lang === 'zh' ? '冷链温度' : 'Cold chain'],
+          ['24h',  lang === 'es' ? 'Respuesta cotización'  : lang === 'zh' ? '报价响应' : 'Quote turnaround'],
+        ].map(([n, l]) => (
+          <div><div class="n">{n}</div><div class="l">{l}</div></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Process steps -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow">{t('process_title', lang)}</span>
+        <h2 class="h2" style="margin-top:14px;">{t('process_heading', lang)}</h2>
+      </div>
+      <div class="process-grid">
+        {stepData.map((s, i) => (
+          <div class="process-step">
+            <div class="num">0{i + 1}</div>
+            <div class="bene-ic" style="margin-bottom:16px;">
+              {s.icon === 1 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>}
+              {s.icon === 2 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>}
+              {s.icon === 3 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 7l-5 5-5-5M17 17l-5-5-5 5"/><line x1="2" y1="12" x2="22" y2="12"/></svg>}
+              {s.icon === 4 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a2.4 2.4 0 001.5.5 2.5 2.5 0 002.5-2.5A2.5 2.5 0 0011 18"/><path d="M15 18a2.5 2.5 0 005 0"/><path d="M3 12l-1 4h18l-1-4H3z"/></svg>}
+            </div>
+            <h3>{getT(s)}</h3>
+            <p>{getD(s)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Logistics -->
+  <section class="section bene">
+    <div class="wrap">
+      <div class="logi">
+        <div>
+          <div class="logi-visual">
+            <div class="ph" style="height:100%;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="m21 15-5-5L5 21"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="eyebrow">{t('logistics_title', lang)}</span>
+          <h2 class="h2" style="margin:12px 0 6px;">{t('logistics_heading', lang)}</h2>
+          <div class="logi-list">
+            {logiData.map((l) => (
+              <div class="logi-item">
+                <div class="ic">
+                  {l.icon === 1 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a2.4 2.4 0 001.5.5 2.5 2.5 0 002.5-2.5A2.5 2.5 0 0011 18"/><path d="M15 18a2.5 2.5 0 005 0"/><path d="M3 12l-1 4h18l-1-4H3z"/></svg>}
+                  {l.icon === 2 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>}
+                  {l.icon === 3 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/></svg>}
+                  {l.icon === 4 && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>}
+                </div>
+                <div>
+                  <h4>{getT(l)}</h4>
+                  <p>{getD(l)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Markets -->
+  <section class="section trust">
+    <div class="wrap center">
+      <span class="eyebrow">{t('coverage_eyebrow', lang)}</span>
+      <h2 class="h2" style="margin:14px auto 12px;max-width:18ch;">{t('coverage_heading', lang)}</h2>
+      <div class="map-markets" style="justify-content:center;max-width:680px;margin:26px auto 0;">
+        {markets[lang].map(m => (
+          <span class="market-tag" style="font-size:.95rem;padding:.6em 1.2em;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-2px;margin-right:5px;color:#7ef0c4;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {m}
+          </span>
+        ))}
+      </div>
+      <div style="margin-top:34px;">
+        <a href="/contacto" class="btn btn-accent btn-lg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          {t('cta_quote', lang)}
+        </a>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  @media(max-width:900px) {
+    .logi { grid-template-columns: 1fr !important; }
+    .process-grid { grid-template-columns: repeat(2,1fr) !important; }
+    .process-step { border-right: none !important; border-bottom: 1px solid var(--line); }
+    .process-step:nth-child(odd) { border-right: 1px solid var(--line) !important; }
+    .process-step:last-child, .process-step:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+  }
+  @media(max-width:560px) {
+    .process-grid { grid-template-columns: 1fr !important; }
+    .process-step { border-right: none !important; }
+  }
+</style>

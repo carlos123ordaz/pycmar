@@ -1,0 +1,294 @@
+---
+import type { Lang } from '../../lib/i18n';
+
+const lang: Lang = Astro.locals.lang ?? 'es';
+
+const labels: Record<Lang, { title: string; heading: string; sub: string; cta: string; order: string }> = {
+  es: {
+    title:   'Pago exitoso — Pycmar',
+    heading: '¡Pago recibido!',
+    sub:     'Tu pedido ha sido confirmado. Nos pondremos en contacto contigo a la brevedad para coordinar el despacho.',
+    cta:     'Volver al catálogo',
+    order:   'N.° de pedido',
+  },
+  en: {
+    title:   'Payment successful — Pycmar',
+    heading: 'Payment received!',
+    sub:     'Your order has been confirmed. We will contact you shortly to coordinate delivery.',
+    cta:     'Back to catalog',
+    order:   'Order',
+  },
+  zh: {
+    title:   '支付成功 — Pycmar',
+    heading: '付款已收到！',
+    sub:     '您的订单已确认。我们将尽快与您联系安排配送。',
+    cta:     '返回目录',
+    order:   '订单号',
+  },
+};
+const l = labels[lang];
+
+// Stripe appends ?payment_intent=pi_xxx&payment_intent_client_secret=...&redirect_status=succeeded
+const paymentIntentId = Astro.url.searchParams.get('payment_intent') ?? '';
+const redirectStatus  = Astro.url.searchParams.get('redirect_status') ?? '';
+
+// If redirect_status is not "succeeded", show a generic error
+const success = redirectStatus === 'succeeded' || redirectStatus === '';
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{l.title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f5f7fa;
+    color: #0B1F3B;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* Header */
+  .cs-header {
+    background: #0B1F3B;
+    padding: 0 clamp(16px, 5vw, 48px);
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cs-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -.02em;
+  }
+  .cs-logo-mark {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: #10B981;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cs-logo-mark svg { width: 18px; height: 18px; color: #06281c; }
+
+  /* Main */
+  .cs-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(32px, 6vw, 80px) clamp(16px, 4vw, 32px);
+  }
+
+  .cs-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid #e4e9f0;
+    box-shadow: 0 4px 24px rgba(11,31,59,.07);
+    padding: clamp(36px, 6vw, 64px) clamp(28px, 5vw, 56px);
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .cs-icon {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: #d1fae5;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+  }
+  .cs-icon svg { width: 40px; height: 40px; color: #059669; }
+
+  .cs-icon--error {
+    background: #fef2f2;
+  }
+  .cs-icon--error svg { color: #ef4444; }
+
+  .cs-heading {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: #0B1F3B;
+    margin-bottom: 12px;
+  }
+
+  .cs-sub {
+    font-size: .96rem;
+    color: #6B7280;
+    line-height: 1.6;
+    max-width: 380px;
+    margin-bottom: 32px;
+  }
+
+  .cs-order-ref {
+    background: #f5f7fa;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: .84rem;
+    color: #9aa3b0;
+    font-weight: 600;
+    font-family: monospace;
+    letter-spacing: .04em;
+    margin-bottom: 32px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cs-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .5em;
+    padding: .85em 1.8em;
+    background: #10B981;
+    color: #06281c;
+    font-weight: 800;
+    font-size: .98rem;
+    border-radius: 12px;
+    transition: .2s;
+  }
+  .cs-cta:hover {
+    background: #0c9b6c;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(16,185,129,.28);
+  }
+  .cs-cta svg { width: 16px; height: 16px; }
+
+  .cs-steps {
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid #e4e9f0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: left;
+  }
+  .cs-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: .88rem;
+    color: #6B7280;
+  }
+  .cs-step-num {
+    min-width: 22px; height: 22px;
+    background: #e8f5f0;
+    color: #059669;
+    border-radius: 50%;
+    font-size: .74rem;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .cs-step strong { color: #0B1F3B; font-weight: 700; }
+</style>
+
+<!-- Header -->
+<header class="cs-header">
+  <a href="/" class="cs-logo">
+    <div class="cs-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6-3.56 0-7.56-2.54-8.5-6z"/>
+        <path d="M18 12h.01"/>
+        <path d="M6.5 12c-1-2-2.5-3-4.5-3s-3 1-3 3 1 3 3 3 3.5-1 4.5-3z"/>
+      </svg>
+    </div>
+    Pycmar
+  </a>
+</header>
+
+<!-- Content -->
+<main class="cs-main">
+  {success ? (
+    <div class="cs-card">
+      <div class="cs-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <h1 class="cs-heading">{l.heading}</h1>
+      <p class="cs-sub">{l.sub}</p>
+
+      {paymentIntentId && (
+        <div class="cs-order-ref">{l.order}: {paymentIntentId}</div>
+      )}
+
+      <a href="/catalogo" class="cs-cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        {l.cta}
+      </a>
+
+      <div class="cs-steps">
+        <div class="cs-step">
+          <span class="cs-step-num">1</span>
+          <span><strong>Confirmación</strong> — Recibirás un correo de confirmación con el resumen de tu pedido.</span>
+        </div>
+        <div class="cs-step">
+          <span class="cs-step-num">2</span>
+          <span><strong>Coordinación</strong> — Nuestro equipo te contactará para confirmar fecha y lugar de entrega.</span>
+        </div>
+        <div class="cs-step">
+          <span class="cs-step-num">3</span>
+          <span><strong>Despacho</strong> — Tu pedido será despachado en frío según los estándares de exportación.</span>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div class="cs-card">
+      <div class="cs-icon cs-icon--error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <h1 class="cs-heading">Pago no completado</h1>
+      <p class="cs-sub">El pago no pudo procesarse. Puedes intentarlo nuevamente desde el carrito.</p>
+      <a href="/checkout" class="cs-cta">Volver al checkout</a>
+    </div>
+  )}
+</main>
+
+<script>
+  // Clear the cart on successful payment
+  if (new URLSearchParams(window.location.search).get('redirect_status') === 'succeeded') {
+    const cart = JSON.parse(localStorage.getItem('pycmar_cart') || '[]');
+    const quoteItems = cart.filter((i: { mode: string }) => i.mode === 'quote');
+    // Keep quote items, remove only buy items
+    localStorage.setItem('pycmar_cart', JSON.stringify(quoteItems));
+    document.dispatchEvent(new CustomEvent('cart-updated'));
+  }
+</script>
+
+</body>
+</html>
