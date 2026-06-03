@@ -314,4 +314,17 @@ const waMsg = encodeURIComponent(
     .pdp-gallery { position: static !important; }
     .prod-grid { grid-template-columns: repeat(2,1fr) !important; }
   }
+  @media(max-width:640px) {
+    /* Thumbnails: menos columnas para tap targets más grandes */
+    .pdp-thumbs { grid-template-columns: repeat(4,1fr); gap: 8px; }
+    /* Qty row: apilada en muy estrecho */
+    .pdp-buy .row { gap: 12px; }
+    /* Qty input más ancho para touch */
+    .qty input { width: 60px; font-size: 1.1rem; }
+  }
+  @media(max-width:480px) {
+    /* En pantallas pequeñas los thumbnails van a 5 columnas para ser más pequeños
+       pero visibles, o simplificamos a scroll horizontal */
+    .pdp-thumbs { grid-template-columns: repeat(4,1fr); gap: 6px; }
+  }
 </style>

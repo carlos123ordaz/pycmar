@@ -298,7 +298,22 @@ const labelVerRes  = lang === 'zh' ? '查看结果' : lang === 'en' ? 'View resu
     .catalog-layout { grid-template-columns: 1fr !important; }
     .prod-grid.cols3 { grid-template-columns: repeat(2,1fr) !important; }
   }
-  @media(max-width:400px) {
-    .prod-grid.cols3 { grid-template-columns: 1fr !important; }
+  @media(max-width:680px) {
+    /* Toolbar: 2 columnas iguales */
+    .catalog-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    /* Ocultar conteo de productos (ocupa espacio innecesario) */
+    .catalog-bar .ct { display: none; }
+    /* Botón filtros: ancho completo y centrado */
+    .catalog-bar .mobile-filter-btn { width: 100%; justify-content: center; }
+    /* Ocultar label "Ordenar:" — el select se explica solo */
+    .catalog-bar > div:last-child > span { display: none; }
+    /* Select ocupa todo el ancho de su celda */
+    .catalog-bar form,
+    .catalog-bar .select { width: 100%; box-sizing: border-box; }
   }
 </style>

@@ -108,7 +108,7 @@ export async function sendOrderConfirmation(p: OrderEmailParams) {
       <!-- Footer -->
       <tr>
         <td style="background:#f5f7fa;padding:20px 32px;font-size:12px;color:#9aa3b0;text-align:center">
-          © Pycmar — Exportadores de productos del mar peruanos
+          © PYCMAR — Exportadores de productos del mar peruanos
         </td>
       </tr>
 
