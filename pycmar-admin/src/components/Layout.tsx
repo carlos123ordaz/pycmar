@@ -55,13 +55,8 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <div className="sidebar-logo-mark">
-            <IconFish />
-          </div>
-          <div className="sidebar-logo-text">
-            <span className="brand">Pycmar</span>
-            <span className="sub">Admin Panel</span>
-          </div>
+          <img src="/assets/logo-white.png" alt="Pycmar" className="sidebar-logo-img" />
+          <span className="sidebar-logo-sub">Admin Panel</span>
         </div>
 
         <nav className="sidebar-nav">
@@ -127,16 +122,6 @@ export default function Layout() {
 }
 
 // ---- Icons ----------------------------------------------------------------
-
-function IconFish() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6-3.56 0-7.56-2.54-8.5-6z"/>
-      <path d="M18 12h.01"/>
-      <path d="M6.5 12c-1-2-2.5-3-4.5-3s-3 1-3 3 1 3 3 3 3.5-1 4.5-3z"/>
-    </svg>
-  )
-}
 
 function IconDashboard() {
   return (
