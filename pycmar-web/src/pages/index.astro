@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { createSupabaseServer } from '../lib/supabase';
+import { createSupabaseServer, getImageUrl } from '../lib/supabase';
 import { t, markets, certs, pName, catName } from '../lib/i18n';
 import type { Product, Category } from '../lib/types';
 
@@ -102,7 +102,10 @@ const title = lang === 'es' ? 'PYCMAR — Exportadores de Productos del Mar'
               class:list={['cat-card', { span2: idx === 0 }]}
               style="text-decoration:none;"
             >
-              <div class="ph" style="position:absolute;inset:0;z-index:-2;border-radius:0;"></div>
+              {cat.image_url
+                ? <img src={getImageUrl('category-images', cat.image_url)} alt={catName(cat, lang)} />
+                : <div class="ph" style="position:absolute;inset:0;z-index:-2;border-radius:0;"></div>
+              }
               <div class="body">
                 <div class="count">{countLabel}</div>
                 <h3 style={idx === 0 ? 'font-size:1.9rem;' : ''}>{catName(cat, lang)}</h3>

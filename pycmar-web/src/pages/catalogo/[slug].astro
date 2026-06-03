@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
 import { createSupabaseServer, getImageUrl } from '../../lib/supabase';
 import { t, pName, pBlurb, pDesc, catName } from '../../lib/i18n';
 import type { Product } from '../../lib/types';
@@ -218,27 +219,7 @@ const waMsg = encodeURIComponent(
       <div style="margin-top:clamp(50px,7vw,90px);">
         <h2 class="h3" style="margin-bottom:24px;">{t('related', lang)}</h2>
         <div class="prod-grid">
-          {related.map(p => (
-            <a href={`/catalogo/${p.slug}`} class="pcard" style="text-decoration:none;">
-              <div class="pcard-img">
-                <div class="ph" style="height:100%;">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-                </div>
-                <div class="pcard-tags">
-                  {p.tags.map(tg => <span class={`tag tag-${tg}`}>{tg}</span>)}
-                </div>
-              </div>
-              <div class="pcard-body">
-                <h3>{pName(p, lang)}</h3>
-                <div class="pcard-foot">
-                  <div class="price">
-                    <span class="v">S/ {p.price.toFixed(2)}</span>
-                    <span class="u">/ kg</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          ))}
+          {related.map(p => <ProductCard product={p} lang={lang} />)}
         </div>
       </div>
     )}
