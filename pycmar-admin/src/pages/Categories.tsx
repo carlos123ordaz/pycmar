@@ -67,6 +67,7 @@ export default function Categories() {
     setForm(emptyForm)
     setSlugManuallyEdited(false)
     setError(null)
+    setSaving(false)
     setModalOpen(true)
   }
 
@@ -83,6 +84,7 @@ export default function Categories() {
     })
     setSlugManuallyEdited(true)
     setError(null)
+    setSaving(false)
     setModalOpen(true)
   }
 
@@ -152,6 +154,7 @@ export default function Categories() {
         if (insertErr) throw insertErr
       }
 
+      setSaving(false)
       setModalOpen(false)
       showToast(editTarget ? 'Categoría actualizada.' : 'Categoría creada.')
       fetchCategories()
