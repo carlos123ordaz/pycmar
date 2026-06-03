@@ -29,9 +29,9 @@ const catOrder = ['pota','marisco','pescado','calamar','preparados'];
 const homeCats = catOrder.map(slug => cats.find(c => c.slug === slug)).filter(Boolean) as Category[];
 const displayCats = homeCats.length > 0 ? homeCats : cats.slice(0, 5);
 
-const title = lang === 'es' ? 'PYCMAR — Exportadores de Productos del Mar'
-  : lang === 'en' ? 'Pycmar — Seafood Exporters'
-  : 'Pycmar — 海产品出口商';
+const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Productos Hidrobiológicos'
+  : lang === 'en' ? 'PYCMAR EXPORT PERU S.A.C. - Hydrobiological Products Export'
+  : 'PYCMAR EXPORT PERU S.A.C. - 水产品出口';
 ---
 
 <BaseLayout title={title}>
