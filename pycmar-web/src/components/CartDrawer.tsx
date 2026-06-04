@@ -4,10 +4,19 @@ import type { Lang } from '../lib/i18n';
 interface CartItem {
   id: string;
   name: string;
+  name_es?: string;
+  name_en?: string;
+  name_zh?: string;
   sci?: string;
   price: number;
   qty: number;
   mode: 'buy' | 'quote';
+}
+
+function getItemName(item: CartItem, lang: Lang): string {
+  if (lang === 'zh' && item.name_zh) return item.name_zh;
+  if (lang === 'en' && item.name_en) return item.name_en;
+  return item.name_es || item.name;
 }
 
 interface Props {
@@ -97,7 +106,7 @@ function QuoteModal({ items, lang, close }: { items: CartItem[], lang: Lang, clo
                 </div>
                 {quoteItems.map(i => (
                   <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.88rem', padding: '4px 0', gap: 12 }}>
-                    <span>{i.name}</span><b style={{ whiteSpace: 'nowrap' }}>{i.qty} kg</b>
+                    <span>{getItemName(i, lang)}</span><b style={{ whiteSpace: 'nowrap' }}>{i.qty} kg</b>
                   </div>
                 ))}
               </div>
@@ -258,7 +267,7 @@ export default function CartDrawer({ lang = 'es' }: Props) {
                       </div>
                     </div>
                     <div className="ci-body">
-                      <h4>{item.name}</h4>
+                      <h4>{getItemName(item, lang)}</h4>
                       {item.sci && item.sci !== 'Mix' && <div className="ci-sci">{item.sci}</div>}
                       <div className="ci-foot">
                         <div className="qty-sm">

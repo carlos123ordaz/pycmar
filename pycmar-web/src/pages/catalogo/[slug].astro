@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { createSupabaseServer, getImageUrl } from '../../lib/supabase';
-import { t, pName, pBlurb, pDesc, catName } from '../../lib/i18n';
+import { t, pName, pBlurb, pDesc, catName, translateOrigin, translateFormat } from '../../lib/i18n';
 import type { Product } from '../../lib/types';
 
 const lang = Astro.locals.lang;
@@ -28,8 +28,8 @@ const cat = product.category as any;
 const specs: [string, string][] = [
   product.scientific_name ? ['spec_sci', product.scientific_name] : null,
   product.fao_zone        ? ['spec_fao', `FAO ${product.fao_zone}`] : null,
-  product.origin          ? ['spec_origin', product.origin] : null,
-  product.tags.length     ? ['spec_format', product.tags.join(' · ')] : null,
+  product.origin          ? ['spec_origin', translateOrigin(product.origin, lang)] : null,
+  product.tags.length     ? ['spec_format', product.tags.map(tag => translateFormat(tag, lang)).join(' · ')] : null,
   product.presentation    ? ['spec_pres', product.presentation] : null,
   product.measures        ? ['spec_measure', product.measures] : null,
   product.sizing          ? ['spec_sizes', product.sizing] : null,
@@ -38,7 +38,7 @@ const specs: [string, string][] = [
 
 const { data: relatedData } = await supabase
   .from('products')
-  .select('*, images:product_images(*), category:categories(name_es,name_en,slug)')
+  .select('*, images:product_images(*), category:categories(name_es,name_en,name_zh,slug)')
   .eq('category_id', product.category_id)
   .eq('active', true)
   .neq('id', product.id)
@@ -113,11 +113,11 @@ const waMsg = encodeURIComponent(
         )}
         <h1>{name}</h1>
         <div class="pdp-tags">
-          {product.tags.map(tg => <span class={`tag tag-${tg}`}>{tg}</span>)}
+          {product.tags.map(tg => <span class={`tag tag-${tg}`}>{translateFormat(tg, lang)}</span>)}
           {product.origin && (
             <span class="pill">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              {product.origin}
+              {translateOrigin(product.origin, lang)}
             </span>
           )}
         </div>
@@ -169,6 +169,9 @@ const waMsg = encodeURIComponent(
                 id="add-cart-btn"
                 data-id={product.id}
                 data-name={name}
+                data-name-es={product.name_es}
+                data-name-en={product.name_en}
+                data-name-zh={product.name_zh || ''}
                 data-price={product.price}
               >
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -200,7 +203,7 @@ const waMsg = encodeURIComponent(
               <span style="color:var(--gray);font-size:.9rem;">kg {lang === 'es' ? 'estimados' : lang === 'zh' ? '估计' : 'estimated'}</span>
             </div>
             <div class="buy-actions">
-              <button class="btn btn-navy" id="add-quote-btn" data-id={product.id} data-name={name} data-price={product.price}>
+              <button class="btn btn-navy" id="add-quote-btn" data-id={product.id} data-name={name} data-name-es={product.name_es} data-name-en={product.name_en} data-name-zh={product.name_zh || ''} data-price={product.price}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 {t('add_quote', lang)}
               </button>
@@ -227,7 +230,7 @@ const waMsg = encodeURIComponent(
 
 </BaseLayout>
 
-<script define:vars={{ price: product.price, productId: product.id, productName: name }}>
+<script define:vars={{ price: product.price, productId: product.id, productName: name, productNameEs: product.name_es, productNameEn: product.name_en, productNameZh: product.name_zh || '' }}>
   function switchTab(tab) {
     document.getElementById('tab-buy-btn').classList.toggle('on', tab === 'buy');
     document.getElementById('tab-quote-btn').classList.toggle('on', tab === 'quote');
@@ -267,7 +270,7 @@ const waMsg = encodeURIComponent(
     const cart = JSON.parse(localStorage.getItem('pycmar_cart') || '[]');
     const existing = cart.find(i => i.id === productId);
     if (existing) { existing.qty += qty; }
-    else { cart.push({ id: productId, name: productName, price, qty, mode }); }
+    else { cart.push({ id: productId, name: productName, name_es: productNameEs, name_en: productNameEn, name_zh: productNameZh, price, qty, mode }); }
     localStorage.setItem('pycmar_cart', JSON.stringify(cart));
     const total = cart.reduce((s, i) => s + i.qty, 0);
     const badge = document.getElementById('cart-count');

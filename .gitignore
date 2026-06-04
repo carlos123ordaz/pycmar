@@ -5,6 +5,8 @@ node_modules/
 dist/
 build/
 .astro/
+.vercel/
+.output/
 
 # ── Entorno (NUNCA subir claves) ──────────────────────────────
 .env

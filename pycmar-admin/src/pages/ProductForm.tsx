@@ -8,6 +8,7 @@ interface FormData {
   slug: string
   name_es: string
   name_en: string
+  name_zh: string
   scientific_name: string
   category_id: string
   price: string
@@ -20,8 +21,10 @@ interface FormData {
   measures: string
   blurb_es: string
   blurb_en: string
+  blurb_zh: string
   description_es: string
   description_en: string
+  description_zh: string
   featured: boolean
   retail: boolean
   active: boolean
@@ -31,6 +34,7 @@ const empty: FormData = {
   slug: '',
   name_es: '',
   name_en: '',
+  name_zh: '',
   scientific_name: '',
   category_id: '',
   price: '',
@@ -43,8 +47,10 @@ const empty: FormData = {
   measures: '',
   blurb_es: '',
   blurb_en: '',
+  blurb_zh: '',
   description_es: '',
   description_en: '',
+  description_zh: '',
   featured: false,
   retail: false,
   active: true,
@@ -94,6 +100,7 @@ export default function ProductForm() {
               slug: data.slug ?? '',
               name_es: data.name_es ?? '',
               name_en: data.name_en ?? '',
+              name_zh: data.name_zh ?? '',
               scientific_name: data.scientific_name ?? '',
               category_id: data.category_id ?? '',
               price: data.price?.toString() ?? '',
@@ -106,8 +113,10 @@ export default function ProductForm() {
               measures: data.measures ?? '',
               blurb_es: data.blurb_es ?? '',
               blurb_en: data.blurb_en ?? '',
+              blurb_zh: data.blurb_zh ?? '',
               description_es: data.description_es ?? '',
               description_en: data.description_en ?? '',
+              description_zh: data.description_zh ?? '',
               featured: data.featured ?? false,
               retail: data.retail ?? false,
               active: data.active ?? true,
@@ -140,6 +149,7 @@ export default function ProductForm() {
       slug: form.slug,
       name_es: form.name_es,
       name_en: form.name_en,
+      name_zh: form.name_zh || null,
       scientific_name: form.scientific_name || null,
       category_id: form.category_id || null,
       price: form.price ? parseFloat(form.price) : null,
@@ -152,8 +162,10 @@ export default function ProductForm() {
       measures: form.measures || null,
       blurb_es: form.blurb_es || null,
       blurb_en: form.blurb_en || null,
+      blurb_zh: form.blurb_zh || null,
       description_es: form.description_es,
       description_en: form.description_en,
+      description_zh: form.description_zh || null,
       featured: form.featured,
       retail: form.retail,
       active: form.active,
@@ -278,6 +290,15 @@ export default function ProductForm() {
                   onChange={e => set('name_en', e.target.value)}
                   placeholder="Ej. Whole IQF Shrimp"
                   required
+                />
+              </div>
+              <div className="field">
+                <label>Nombre en chino (中文)</label>
+                <input
+                  type="text"
+                  value={form.name_zh}
+                  onChange={e => set('name_zh', e.target.value)}
+                  placeholder="Ej. 整只IQF虾"
                 />
               </div>
               <div className="field">
@@ -425,6 +446,15 @@ export default function ProductForm() {
                 />
               </div>
               <div className="field form-col-full">
+                <label>Resumen corto (中文)</label>
+                <textarea
+                  value={form.blurb_zh}
+                  onChange={e => set('blurb_zh', e.target.value)}
+                  placeholder="产品卡片的简短描述..."
+                  style={{ minHeight: 80 }}
+                />
+              </div>
+              <div className="field form-col-full">
                 <label>Descripción completa (ES)</label>
                 <textarea
                   value={form.description_es}
@@ -439,6 +469,15 @@ export default function ProductForm() {
                   value={form.description_en}
                   onChange={e => set('description_en', e.target.value)}
                   placeholder="Full product description in English..."
+                  style={{ minHeight: 140 }}
+                />
+              </div>
+              <div className="field form-col-full">
+                <label>Descripción completa (中文)</label>
+                <textarea
+                  value={form.description_zh}
+                  onChange={e => set('description_zh', e.target.value)}
+                  placeholder="产品完整描述（中文）..."
                   style={{ minHeight: 140 }}
                 />
               </div>

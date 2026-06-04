@@ -4,7 +4,7 @@ type Dict = Record<string, string>;
 
 const t_data: Record<Lang, Dict> = {
   es: {
-    nav_home:"Inicio", nav_catalog:"Catálogo", nav_export:"Exportación", nav_contact:"Contacto",
+    nav_home:"Inicio", nav_catalog:"Catálogo", nav_about:"Nosotros", nav_export:"Exportación", nav_contact:"Contacto",
     search:"Buscar producto, especie o corte…",
     cta_catalog:"Ver catálogo", cta_quote:"Solicitar cotización",
     hero_eyebrow:"Exportador peruano de productos hidrobiológicos",
@@ -57,7 +57,7 @@ const t_data: Record<Lang, Dict> = {
     reply_24h_sub:"Todo pedido de exportación recibe una cotización FOB/CFR detallada en menos de un día hábil.",
     footer_rights:"Todos los derechos reservados.",
     footer_explore:"Explora", footer_company:"Empresa", footer_contact:"Contacto",
-    footer_about:"Empresa peruana dedicada al desarrollo exportador, procesamiento y comercialización de productos hidrobiológicos con altos estándares de calidad.",
+    footer_about:"Empresa peruana dedicada al desarrollo exportador, gestión operativa, procesamiento y comercialización de productos hidrobiológicos. Soluciones eficientes, confiables y sostenibles para el mercado nacional e internacional.",
     login:"Ingresar", register:"Crear cuenta", logout:"Salir",
     announce_text:"Exportación a 6 mercados internacionales",
     vol_1:"< 1 contenedor", vol_2:"1–3 contenedores / mes", vol_3:"3–10 contenedores / mes", vol_4:"> 10 contenedores / mes",
@@ -75,7 +75,7 @@ const t_data: Record<Lang, Dict> = {
     products_to_quote:"Productos a cotizar", quote_dest:"Destino, Incoterm, frecuencia…",
   },
   en: {
-    nav_home:"Home", nav_catalog:"Catalog", nav_export:"Export", nav_contact:"Contact",
+    nav_home:"Home", nav_catalog:"Catalog", nav_about:"About", nav_export:"Export", nav_contact:"Contact",
     search:"Search product, species or cut…",
     cta_catalog:"View catalog", cta_quote:"Request a quote",
     hero_eyebrow:"Peruvian exporter of hydrobiological products",
@@ -128,7 +128,7 @@ const t_data: Record<Lang, Dict> = {
     reply_24h_sub:"Every export request gets a detailed FOB/CFR quote in under one business day.",
     footer_rights:"All rights reserved.",
     footer_explore:"Explore", footer_company:"Company", footer_contact:"Contact",
-    footer_about:"Peruvian company dedicated to export development, processing and commercialization of hydrobiological products under high quality standards.",
+    footer_about:"Peruvian company dedicated to export development, operational management, processing and commercialization of hydrobiological products. Efficient, reliable and sustainable solutions for domestic and international markets.",
     login:"Log in", register:"Sign up", logout:"Log out",
     announce_text:"Exporting to 6 international markets",
     vol_1:"< 1 container", vol_2:"1–3 containers / month", vol_3:"3–10 containers / month", vol_4:"> 10 containers / month",
@@ -146,7 +146,7 @@ const t_data: Record<Lang, Dict> = {
     products_to_quote:"Products to quote", quote_dest:"Destination, Incoterm, frequency…",
   },
   zh: {
-    nav_home:"首页", nav_catalog:"产品目录", nav_export:"出口业务", nav_contact:"联系我们",
+    nav_home:"首页", nav_catalog:"产品目录", nav_about:"关于我们", nav_export:"出口业务", nav_contact:"联系我们",
     search:"搜索产品、物种或切割方式…",
     cta_catalog:"查看目录", cta_quote:"申请报价",
     hero_eyebrow:"秘鲁水产品出口商",
@@ -199,7 +199,7 @@ const t_data: Record<Lang, Dict> = {
     reply_24h_sub:"每个出口请求都会在一个工作日内收到详细的FOB/CFR报价。",
     footer_rights:"版权所有。",
     footer_explore:"探索", footer_company:"公司", footer_contact:"联系方式",
-    footer_about:"秘鲁企业，专注于水产品出口开发、加工和营销，遵循高质量标准。",
+    footer_about:"秘鲁企业，致力于水产品出口开发、运营管理、加工和销售。为国内外市场提供高效、可靠和可持续的解决方案。",
     login:"登录", register:"注册", logout:"退出",
     announce_text:"出口至6个国际市场",
     vol_1:"< 1个集装箱", vol_2:"1–3个集装箱/月", vol_3:"3–10个集装箱/月", vol_4:"> 10个集装箱/月",
@@ -227,21 +227,30 @@ export function getLang(val: string | undefined): Lang {
   return 'es';
 }
 
-export function pName(p: { name_es: string; name_en: string }, lang: Lang): string {
+export function pName(p: { name_es: string; name_en: string; name_zh?: string | null }, lang: Lang): string {
+  if (lang === 'zh' && p.name_zh) return p.name_zh;
   return (lang !== 'es' && p.name_en) ? p.name_en : p.name_es;
 }
 
-export function pBlurb(p: { blurb_es?: string | null; blurb_en?: string | null }, lang: Lang): string | null {
+export function pBlurb(p: { blurb_es?: string | null; blurb_en?: string | null; blurb_zh?: string | null }, lang: Lang): string | null {
+  if (lang === 'zh' && p.blurb_zh) return p.blurb_zh;
   if (lang !== 'es' && p.blurb_en) return p.blurb_en;
   return p.blurb_es ?? null;
 }
 
-export function pDesc(p: { description_es: string; description_en: string }, lang: Lang): string {
+export function pDesc(p: { description_es: string; description_en: string; description_zh?: string | null }, lang: Lang): string {
+  if (lang === 'zh' && p.description_zh) return p.description_zh;
   return (lang !== 'es' && p.description_en) ? p.description_en : p.description_es;
 }
 
-export function catName(p: { name_es: string; name_en: string }, lang: Lang): string {
+export function catName(p: { name_es: string; name_en: string; name_zh?: string | null }, lang: Lang): string {
+  if (lang === 'zh' && p.name_zh) return p.name_zh;
   return (lang !== 'es' && p.name_en) ? p.name_en : p.name_es;
+}
+
+export function catDesc(p: { description_es: string; description_en: string; description_zh?: string | null }, lang: Lang): string {
+  if (lang === 'zh' && p.description_zh) return p.description_zh;
+  return (lang !== 'es' && p.description_en) ? p.description_en : p.description_es;
 }
 
 export const markets: Record<Lang, string[]> = {
@@ -250,4 +259,35 @@ export const markets: Record<Lang, string[]> = {
   zh: ['美国','西班牙','中国','日本','意大利','韩国'],
 };
 
-export const certs = ['HACCP','SANIPES','FDA','BRCGS','Unión Europea','MSC Chain'];
+const FORMAT_MAP: Record<string, Record<Lang, string>> = {
+  'IQF':      { es: 'IQF',      en: 'IQF',        zh: 'IQF'  },
+  'Bloque':   { es: 'Bloque',   en: 'Block',       zh: '块冻'  },
+  'Cocido':   { es: 'Cocido',   en: 'Cooked',      zh: '熟制'  },
+  'Prefrito': { es: 'Prefrito', en: 'Pre-fried',   zh: '预炸'  },
+};
+export function translateFormat(fmt: string, lang: Lang): string {
+  return FORMAT_MAP[fmt]?.[lang] ?? fmt;
+}
+
+const ORIGIN_MAP: Record<string, { en: string; zh: string }> = {
+  'Perú':           { en: 'Peru',             zh: '秘鲁'          },
+  'Perú (Sechura)': { en: 'Peru (Sechura)',   zh: '秘鲁（塞丘拉）'  },
+  'Perú · Ecuador': { en: 'Peru · Ecuador',   zh: '秘鲁 · 厄瓜多尔' },
+  'Perú · África':  { en: 'Peru · Africa',    zh: '秘鲁 · 非洲'    },
+  'Venezuela':      { en: 'Venezuela',        zh: '委内瑞拉'        },
+  'África':         { en: 'Africa',           zh: '非洲'           },
+  'Atlántico':      { en: 'Atlantic',         zh: '大西洋'          },
+  'Caribe':         { en: 'Caribbean',        zh: '加勒比海'        },
+  'España':         { en: 'Spain',            zh: '西班牙'          },
+  'Pacífico':       { en: 'Pacific',          zh: '太平洋'          },
+};
+export function translateOrigin(origin: string, lang: Lang): string {
+  if (lang === 'es') return origin;
+  return ORIGIN_MAP[origin]?.[lang] ?? origin;
+}
+
+export const certs: Record<Lang, string[]> = {
+  es: ['HACCP','SANIPES','FDA','BRCGS','Unión Europea','MSC Chain'],
+  en: ['HACCP','SANIPES','FDA','BRCGS','European Union','MSC Chain'],
+  zh: ['HACCP','SANIPES','FDA','BRCGS','欧盟','MSC Chain'],
+};

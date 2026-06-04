@@ -11,10 +11,11 @@ const { currentPath = '/', lang } = Astro.props;
 const from = encodeURIComponent(currentPath);
 
 const navLinks = [
-  { href: '/',           key: 'nav_home' },
-  { href: '/catalogo',   key: 'nav_catalog' },
-  { href: '/exportacion',key: 'nav_export' },
-  { href: '/contacto',   key: 'nav_contact' },
+  { href: '/',            key: 'nav_home' },
+  { href: '/catalogo',    key: 'nav_catalog' },
+  { href: '/nosotros',    key: 'nav_about' },
+  { href: '/exportacion', key: 'nav_export' },
+  { href: '/contacto',    key: 'nav_contact' },
 ];
 
 const isActive = (href: string) =>
@@ -150,13 +151,63 @@ const isActive = (href: string) =>
     if (e.target === this) (this as HTMLElement).style.display = 'none';
   });
 
-  // Simple catalog search redirect
-  document.getElementById('search-input')?.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      const q = (e.target as HTMLInputElement).value.trim();
-      if (q) window.location.href = `/catalogo?q=${encodeURIComponent(q)}`;
+  // ── Live search ──────────────────────────────────────────────────────────
+  const searchInput   = document.getElementById('search-input') as HTMLInputElement | null;
+  const searchResults = document.getElementById('search-results') as HTMLElement | null;
+
+  if (searchInput && searchResults) {
+    const lang = document.documentElement.lang || 'es';
+    let debounce: ReturnType<typeof setTimeout>;
+
+    function hideResults() {
+      searchResults!.style.display = 'none';
+      searchResults!.innerHTML = '';
     }
-  });
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounce);
+      const q = searchInput.value.trim();
+      if (q.length < 2) { hideResults(); return; }
+
+      debounce = setTimeout(async () => {
+        try {
+          const res  = await fetch(`/api/search?q=${encodeURIComponent(q)}&lang=${lang}`);
+          const data = await res.json() as { id: string; name: string; cat: string; slug: string; img: string }[];
+
+          if (!data.length) { hideResults(); return; }
+
+          searchResults.innerHTML = data.map(p => `
+            <a href="/catalogo/${p.slug}">
+              <div class="thumb">
+                <img src="${p.img}" alt="${p.name}" width="42" height="42"
+                     style="width:42px;height:42px;object-fit:cover;"
+                     onerror="this.style.display='none'">
+              </div>
+              <div>
+                <div class="sr-name">${p.name}</div>
+                <div class="sr-cat">${p.cat ?? ''}</div>
+              </div>
+            </a>
+          `).join('');
+
+          searchResults.style.display = 'block';
+        } catch { hideResults(); }
+      }, 280);
+    });
+
+    searchInput.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        const q = searchInput.value.trim();
+        if (q) { hideResults(); window.location.href = `/catalogo?q=${encodeURIComponent(q)}`; }
+      }
+      if (e.key === 'Escape') { hideResults(); searchInput.blur(); }
+    });
+
+    // Cerrar al hacer click fuera
+    document.addEventListener('click', (e) => {
+      if (!searchInput.closest('.search-wrap')?.contains(e.target as Node)) hideResults();
+    });
+  }
 </script>
 
 <style>

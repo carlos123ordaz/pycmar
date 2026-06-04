@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { createSupabaseServer, getImageUrl } from '../lib/supabase';
-import { t, markets, certs, pName, catName } from '../lib/i18n';
+import { t, markets, certs, pName, catName, catDesc } from '../lib/i18n';
 import type { Product, Category } from '../lib/types';
 
 const lang = Astro.locals.lang;
@@ -73,10 +73,10 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
     <div class="wrap">
       <div class="hero-marquee">
         <span><b>{t('certifications', lang)}:</b></span>
-        {certs.map((c, i) => (
+        {certs[lang].map((c, i) => (
           <>
             <span>{c}</span>
-            {i < certs.length - 1 && <span class="sep">›</span>}
+            {i < certs[lang].length - 1 && <span class="sep">›</span>}
           </>
         ))}
       </div>
@@ -109,7 +109,7 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
               <div class="body">
                 <div class="count">{countLabel}</div>
                 <h3 style={idx === 0 ? 'font-size:1.9rem;' : ''}>{catName(cat, lang)}</h3>
-                <div class="d">{lang === 'en' ? cat.description_en : cat.description_es}</div>
+                <div class="d">{catDesc(cat, lang)}</div>
                 <div class="go">
                   {lang === 'zh' ? '探索' : lang === 'en' ? 'Explore' : 'Explorar'}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -197,7 +197,7 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
           </div>
         </div>
         <div class="cert-row" style="margin:0;">
-          {certs.map(c => (
+          {certs[lang].map(c => (
             <div class="cert">
               <div class="ck">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

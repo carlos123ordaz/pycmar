@@ -3,8 +3,10 @@ export interface Category {
   slug: string;
   name_es: string;
   name_en: string;
+  name_zh: string | null;
   description_es: string;
   description_en: string;
+  description_zh: string | null;
   image_url: string | null;
   order_index: number;
 }
@@ -16,11 +18,14 @@ export interface Product {
   category?: Category;
   name_es: string;
   name_en: string;
+  name_zh: string | null;
   scientific_name: string | null;
   description_es: string;
   description_en: string;
+  description_zh: string | null;
   blurb_es: string | null;
   blurb_en: string | null;
+  blurb_zh: string | null;
   price: number;
   tags: string[];
   origin: string | null;

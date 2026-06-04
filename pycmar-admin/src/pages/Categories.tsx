@@ -6,8 +6,10 @@ interface CategoryFormData {
   slug: string
   name_es: string
   name_en: string
+  name_zh: string
   description_es: string
   description_en: string
+  description_zh: string
   order_index: string
   image_url: string
 }
@@ -16,8 +18,10 @@ const emptyForm: CategoryFormData = {
   slug: '',
   name_es: '',
   name_en: '',
+  name_zh: '',
   description_es: '',
   description_en: '',
+  description_zh: '',
   order_index: '0',
   image_url: '',
 }
@@ -77,8 +81,10 @@ export default function Categories() {
       slug: cat.slug,
       name_es: cat.name_es,
       name_en: cat.name_en,
+      name_zh: cat.name_zh ?? '',
       description_es: cat.description_es ?? '',
       description_en: cat.description_en ?? '',
+      description_zh: cat.description_zh ?? '',
       order_index: String(cat.order_index),
       image_url: cat.image_url ?? '',
     })
@@ -134,8 +140,10 @@ export default function Categories() {
       slug: form.slug,
       name_es: form.name_es,
       name_en: form.name_en,
+      name_zh: form.name_zh || null,
       description_es: form.description_es,
       description_en: form.description_en,
+      description_zh: form.description_zh || null,
       order_index: parseInt(form.order_index) || 0,
       image_url: form.image_url || null,
     }
@@ -215,6 +223,7 @@ export default function Categories() {
                 <th>Imagen</th>
                 <th>Nombre (ES)</th>
                 <th>Nombre (EN)</th>
+                <th>Nombre (中文)</th>
                 <th>Descripción (ES)</th>
                 <th>Slug</th>
                 <th></th>
@@ -239,6 +248,7 @@ export default function Categories() {
                   </td>
                   <td style={{ fontWeight: 700 }}>{cat.name_es}</td>
                   <td style={{ color: 'var(--gray)' }}>{cat.name_en}</td>
+                  <td style={{ color: 'var(--gray)' }}>{cat.name_zh || '—'}</td>
                   <td style={{ color: 'var(--gray)', maxWidth: 240 }}>
                     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
                       {cat.description_es || '—'}
@@ -303,6 +313,15 @@ export default function Categories() {
                     />
                   </div>
                   <div className="field">
+                    <label>Nombre en chino (中文)</label>
+                    <input
+                      type="text"
+                      value={form.name_zh}
+                      onChange={e => setField('name_zh', e.target.value)}
+                      placeholder="Ej. 鱿鱼"
+                    />
+                  </div>
+                  <div className="field">
                     <label>Slug <span className="req">*</span></label>
                     <input
                       type="text"
@@ -333,6 +352,15 @@ export default function Categories() {
                     <textarea
                       value={form.description_en}
                       onChange={e => setField('description_en', e.target.value)}
+                      style={{ minHeight: 80 }}
+                    />
+                  </div>
+                  <div className="field form-col-full">
+                    <label>Descripción (中文)</label>
+                    <textarea
+                      value={form.description_zh}
+                      onChange={e => setField('description_zh', e.target.value)}
+                      placeholder="分类描述（中文）..."
                       style={{ minHeight: 80 }}
                     />
                   </div>

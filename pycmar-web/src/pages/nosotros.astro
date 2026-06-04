@@ -1,0 +1,475 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { certs } from '../lib/i18n';
+
+const lang = Astro.locals.lang;
+const isEs = lang === 'es';
+const isZh = lang === 'zh';
+
+const pageTitle = isEs ? 'Nosotros — Pycmar' : isZh ? '关于我们 — Pycmar' : 'About — Pycmar';
+const pageDesc  = isEs
+  ? 'Conoce a Pycmar: empresa peruana dedicada al desarrollo exportador de productos hidrobiológicos congelados con calidad y trazabilidad.'
+  : isZh
+  ? '了解Pycmar：秘鲁公司，致力于冷冻水产品出口开发，质量可追溯。'
+  : 'Learn about Pycmar: a Peruvian company dedicated to the export development of frozen hydrobiological products with quality and traceability.';
+
+const values = [
+  {
+    ic: 'shield',
+    es_t: 'Calidad certificada', en_t: 'Certified quality', zh_t: '认证质量',
+    es_d: 'Cada lote pasa por control bajo protocolos HACCP y SANIPES, desde la recepción hasta el embarque.',
+    en_d: 'Every batch is controlled under HACCP and SANIPES protocols, from intake to shipping.',
+    zh_d: '每批次按照HACCP和SANIPES协议进行质量控制，从接收到装运全程把关。',
+  },
+  {
+    ic: 'snow',
+    es_t: 'Cadena de frío', en_t: 'Unbroken cold chain', zh_t: '完整冷链',
+    es_d: 'Congelado IQF y en bloque a −18 °C, sin interrupción entre la planta y el contenedor reefer.',
+    en_d: 'IQF and block freezing at −18 °C, unbroken from plant to reefer container.',
+    zh_d: 'IQF和整块冷冻至-18°C，从工厂到冷藏集装箱全程不中断。',
+  },
+  {
+    ic: 'leaf',
+    es_t: 'Pesca responsable', en_t: 'Responsible sourcing', zh_t: '负责任捕捞',
+    es_d: 'Trabajamos con captura artesanal e industrial trazable, respetando tallas y zonas FAO.',
+    en_d: 'We work with traceable artisanal and industrial catch, respecting sizes and FAO zones.',
+    zh_d: '我们使用可追溯的传统和工业捕捞方式，遵守规格要求和FAO区域规定。',
+  },
+  {
+    ic: 'anchor',
+    es_t: 'Origen peruano', en_t: 'Peruvian origin', zh_t: '秘鲁原产',
+    es_d: 'Desde Paita y Lima al mundo: el sabor y la riqueza del mar peruano en cada embarque.',
+    en_d: 'From Paita and Lima to the world: the flavor and wealth of the Peruvian sea in every shipment.',
+    zh_d: '从派塔和利马到世界：每次发货都蕴含秘鲁大海的风味与丰富资源。',
+  },
+];
+
+const getT = (item: any) => isZh ? item.zh_t : (lang === 'en' ? item.en_t : item.es_t);
+const getD = (item: any) => isZh ? item.zh_d : (lang === 'en' ? item.en_d : item.es_d);
+---
+
+<BaseLayout title={pageTitle} description={pageDesc} currentPath="/nosotros">
+
+  <!-- Hero -->
+  <section class="export-hero">
+    <div class="wrap">
+      <span class="eyebrow on-dark">
+        {isEs ? 'Nosotros' : isZh ? '关于我们' : 'About us'}
+      </span>
+      <h1 class="display" style="margin:.3em 0 .4em;max-width:18ch;">
+        {isEs
+          ? <>{`Una empresa peruana que lleva `}<em class="serif-em">{`el mar al mundo`}</em>.</>
+          : isZh
+          ? <>{`一家将`}<em class="serif-em">{`大海带向世界`}</em>{`的秘鲁企业。`}</>
+          : <>{`A Peruvian company taking `}<em class="serif-em">{`the sea to the world`}</em>.</>
+        }
+      </h1>
+      <p class="lead" style="color:#bfe0e9;max-width:54ch;">
+        {isEs
+          ? 'Empresa peruana dedicada al desarrollo exportador, gestión operativa, procesamiento y comercialización de productos hidrobiológicos. Soluciones eficientes, confiables y sostenibles para el mercado nacional e internacional.'
+          : isZh
+          ? '秘鲁企业，致力于水产品出口开发、运营管理、加工和销售。为国内外市场提供高效、可靠和可持续的解决方案。'
+          : 'Peruvian company dedicated to export development, operational management, processing and commercialization of hydrobiological products. Efficient, reliable and sustainable solutions for domestic and international markets.'
+        }
+      </p>
+      <div class="export-hero-stats" style="margin-top:36px;">
+        {[
+          ['35+',    isEs ? 'Especies en línea'    : isZh ? '产品种类'   : 'Species in line'],
+          ['6',      isEs ? 'Mercados de destino'  : isZh ? '目标市场'   : 'Destination markets'],
+          ['−18°C',  isEs ? 'Cadena de frío'       : isZh ? '冷链温度'   : 'Cold chain'],
+          ['100%',   isEs ? 'Trazabilidad'         : isZh ? '完整溯源'   : 'Traceability'],
+        ].map(([n, l]) => (
+          <div><div class="n">{n}</div><div class="l">{l}</div></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Quiénes somos -->
+  <section class="section">
+    <div class="wrap">
+      <div class="logi">
+        <div>
+          <span class="eyebrow">
+            {isEs ? 'Quiénes somos' : isZh ? '我们是谁' : 'Who we are'}
+          </span>
+          <h2 class="h2" style="margin:12px 0 16px;">
+            {isEs ? 'Una empresa peruana comprometida con la excelencia'
+                  : isZh ? '致力于卓越的秘鲁企业'
+                  : 'A Peruvian company committed to excellence'}
+          </h2>
+          <p class="lead" style="margin-bottom:16px;">
+            {isEs
+              ? 'PYCMAR EXPORT PERÚ es una empresa peruana dedicada al desarrollo exportador, gestión operativa, procesamiento y comercialización de productos hidrobiológicos.'
+              : isZh
+              ? 'PYCMAR EXPORT PERÚ是一家秘鲁企业，致力于水产品的出口开发、运营管理、加工和销售。'
+              : 'PYCMAR EXPORT PERÚ is a Peruvian company dedicated to export development, operational management, processing and commercialization of hydrobiological products.'
+            }
+          </p>
+          <p class="muted" style="font-size:1rem;line-height:1.65;">
+            {isEs
+              ? 'Nuestro compromiso es ofrecer soluciones eficientes, confiables y sostenibles tanto para el mercado nacional como para clientes internacionales que exigen altos estándares de calidad.'
+              : isZh
+              ? '我们的承诺是为国内市场和有着高质量标准要求的国际客户提供高效、可靠和可持续的解决方案。'
+              : 'Our commitment is to offer efficient, reliable and sustainable solutions for both the domestic market and international clients demanding high quality standards.'
+            }
+          </p>
+          <div class="market-row" style="margin-top:24px;">
+            {certs[lang].slice(0, 4).map(c => <span class="market-tag">{c}</span>)}
+          </div>
+        </div>
+        <div>
+          <div class="logi-visual">
+            <div class="ph" style="height:100%;min-height:320px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="m21 15-5-5L5 21"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Misión & Visión -->
+  <section class="section bene">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow" style="display:block;margin-bottom:14px;">
+          {isEs ? 'Nuestro propósito' : isZh ? '我们的使命' : 'Our purpose'}
+        </span>
+        <h2 class="h2">
+          {isEs ? 'Lo que nos mueve cada día' : isZh ? '每天驱动我们前行的动力' : 'What drives us every day'}
+        </h2>
+      </div>
+      <div class="mv-grid">
+        <div class="mv-card">
+          <div class="bene-ic" style="margin-bottom:18px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="25" height="25">
+              <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+          </div>
+          <span class="bene-n">{isEs ? 'Misión' : isZh ? '使命' : 'Mission'}</span>
+          <h3>{isEs ? 'Soluciones eficientes para el mundo' : isZh ? '为世界提供高效解决方案' : 'Efficient solutions for the world'}</h3>
+          <p>
+            {isEs
+              ? 'Brindar soluciones eficientes y confiables en el desarrollo exportador, gestión operativa y procesamiento de productos hidrobiológicos, generando valor sostenible para nuestros clientes.'
+              : isZh
+              ? '在水产品出口开发、运营管理和加工领域提供高效可靠的解决方案，为客户创造可持续价值。'
+              : 'Provide efficient and reliable solutions in export development, operational management and processing of hydrobiological products, generating sustainable value for our clients.'
+            }
+          </p>
+        </div>
+        <div class="mv-card">
+          <div class="bene-ic" style="margin-bottom:18px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="25" height="25">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+            </svg>
+          </div>
+          <span class="bene-n">{isEs ? 'Visión' : isZh ? '愿景' : 'Vision'}</span>
+          <h3>{isEs ? 'Ser el exportador peruano líder' : isZh ? '成为领先的秘鲁出口商' : 'Become the leading Peruvian exporter'}</h3>
+          <p>
+            {isEs
+              ? 'Convertirnos en un exportador peruano líder reconocido por su calidad, confiabilidad y compromiso con nuestros clientes y con el desarrollo sostenible del sector hidrobiológico.'
+              : isZh
+              ? '成为以质量、可靠性和对客户承诺著称的秘鲁领先出口商，推动水产业可持续发展。'
+              : 'Become a leading Peruvian exporter recognized for quality, reliability and commitment to our clients and the sustainable development of the hydrobiological sector.'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cita -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="about-quote">
+        <div class="divider-chev">
+          <svg viewBox="0 0 12 12" fill="currentColor"><path d="M2 2l4 4-4 4"/></svg>
+          <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 2l4 4-4 4"/></svg>
+        </div>
+        <blockquote>
+          {isEs
+            ? '"No vendemos sólo congelados: entregamos la confianza de una cadena de frío que nunca se rompe, desde la red hasta el plato."'
+            : isZh
+            ? '"我们不只是销售冷冻产品：我们传递的是从渔网到餐桌永不中断的冷链信任。"'
+            : '"We don\'t just sell frozen seafood: we deliver the trust of a cold chain that never breaks, from net to plate."'
+          }
+        </blockquote>
+        <div class="about-quote-by">PYCMAR EXPORT PERÚ · Castilla · Piura</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Valores -->
+  <section class="section">
+    <div class="wrap">
+      <div class="sec-head center">
+        <span class="eyebrow" style="display:block;margin-bottom:14px;">
+          {isEs ? 'Nuestros valores' : isZh ? '我们的价值观' : 'Our values'}
+        </span>
+        <h2 class="h2">
+          {isEs ? 'Los principios detrás de cada contenedor'
+                : isZh ? '每个集装箱背后的原则'
+                : 'The principles behind every container'}
+        </h2>
+        <p class="muted" style="margin-top:12px;">
+          {isEs
+            ? 'Cuatro compromisos que sostienen la relación con nuestros clientes locales e internacionales.'
+            : isZh
+            ? '支撑我们与本地及国际客户关系的四项承诺。'
+            : 'Four commitments that sustain our relationship with local and international clients.'
+          }
+        </p>
+      </div>
+      <div class="bene-grid">
+        {values.map((v, i) => (
+          <div class="bene-card">
+            <span class="bene-n">{String(i + 1).padStart(2, '0')}</span>
+            <div class="bene-ic">
+              {v.ic === 'shield' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="25" height="25">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              )}
+              {v.ic === 'snow' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="25" height="25">
+                  <line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="m20 16-4-4 4-4M4 8l4 4-4 4M16 4l-4 4-4-4M8 20l4-4 4 4"/>
+                </svg>
+              )}
+              {v.ic === 'leaf' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="25" height="25">
+                  <path d="M11 20A7 7 0 014.93 7.88C6.77 5.1 9.5 3.5 12 3.5c3.3 0 6.5 2 8 6-1 4-4 6.5-8 6.5h-1zm0 0v-6"/>
+                </svg>
+              )}
+              {v.ic === 'anchor' && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="25" height="25">
+                  <circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/>
+                  <path d="M5 12H2a10 10 0 0020 0h-3"/>
+                </svg>
+              )}
+            </div>
+            <h3>{getT(v)}</h3>
+            <p>{getD(v)}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Experiencia Operativa -->
+  <section class="section bene">
+    <div class="wrap">
+      <div class="logi">
+        <div>
+          <span class="eyebrow">
+            {isEs ? 'Experiencia operativa' : isZh ? '运营经验' : 'Operational experience'}
+          </span>
+          <h2 class="h2" style="margin:12px 0 16px;">
+            {isEs ? 'Gestión integral de plantas de procesamiento'
+                  : isZh ? '加工厂综合管理'
+                  : 'Comprehensive processing plant management'}
+          </h2>
+          <p class="lead" style="margin-bottom:16px;">
+            {isEs
+              ? 'Contamos con amplia experiencia en gestión operativa y tercerización especializada para plantas de procesamiento hidrobiológico.'
+              : isZh
+              ? '我们在水产品加工厂的运营管理和专业委托加工方面拥有丰富经验。'
+              : 'We have extensive experience in operational management and specialized outsourcing for hydrobiological processing plants.'
+            }
+          </p>
+          <p class="muted" style="font-size:1rem;line-height:1.65;margin-bottom:28px;">
+            {isEs
+              ? 'Administramos equipos completos, incluyendo planillas, alimentación, transporte, seguridad operativa y coordinación integral, lo que fortalece nuestro conocimiento técnico y nos permite operar con eficiencia en cualquier etapa de la cadena productiva.'
+              : isZh
+              ? '我们管理完整团队，包括薪酬、餐饮、交通、运营安全和综合协调，这加强了我们的技术知识，使我们能够在生产链的任何阶段高效运作。'
+              : 'We manage complete teams, including payroll, food, transportation, operational safety and comprehensive coordination, which strengthens our technical knowledge and allows us to operate efficiently at any stage of the production chain.'
+            }
+          </p>
+          <div class="oper-items">
+            {[
+              {
+                es: 'Gestión de planillas', en: 'Payroll management', zh: '薪酬管理',
+                icon: 'users',
+              },
+              {
+                es: 'Alimentación y transporte', en: 'Food & transportation', zh: '餐饮与交通',
+                icon: 'truck',
+              },
+              {
+                es: 'Seguridad operativa', en: 'Operational safety', zh: '运营安全',
+                icon: 'shield',
+              },
+              {
+                es: 'Coordinación integral', en: 'Comprehensive coordination', zh: '综合协调',
+                icon: 'settings',
+              },
+            ].map(item => (
+              <div class="oper-item">
+                <div class="oper-ic">
+                  {item.icon === 'users' && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                    </svg>
+                  )}
+                  {item.icon === 'truck' && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                      <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                      <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                  )}
+                  {item.icon === 'shield' && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                  )}
+                  {item.icon === 'settings' && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                  )}
+                </div>
+                <span>{isZh ? item.zh : (lang === 'en' ? item.en : item.es)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div class="logi-visual">
+            <div class="ph" style="height:100%;min-height:340px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="m21 15-5-5L5 21"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA band -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="cta-band">
+        <div>
+          <div class="divider-chev">
+            <svg viewBox="0 0 12 12" fill="currentColor"><path d="M2 2l4 4-4 4"/></svg>
+            <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 2l4 4-4 4"/></svg>
+          </div>
+          <h2 class="h2" style="margin-top:14px;">
+            {isEs ? '¿Trabajamos juntos en tu próximo embarque?'
+                  : isZh ? '合作共赢，开启下一次发货？'
+                  : 'Shall we work together on your next shipment?'}
+          </h2>
+          <p>
+            {isEs ? 'Conoce nuestra capacidad exportadora o escríbenos para armar tu cotización.'
+                  : isZh ? '了解我们的出口能力，或联系我们获取报价。'
+                  : 'Discover our export capacity or write to us to build your quote.'}
+          </p>
+        </div>
+        <div class="acts">
+          <a href="/exportacion" class="btn btn-accent btn-lg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/>
+            </svg>
+            {isEs ? 'Ver exportación' : isZh ? '查看出口业务' : 'View export'}
+          </a>
+          <a href="/contacto" class="btn btn-ghost-light btn-lg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            {isEs ? 'Solicitar cotización' : isZh ? '申请报价' : 'Request a quote'}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  /* Mission & Vision grid */
+  .mv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: clamp(34px, 4vw, 52px);
+  }
+  .mv-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 34px 28px;
+    transition: .25s var(--ease);
+  }
+  .mv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: transparent;
+  }
+  .mv-card h3 { font-size: 1.22rem; margin-bottom: 12px; }
+  .mv-card p  { font-size: .95rem; color: var(--gray); line-height: 1.65; }
+
+  /* Quote */
+  .about-quote {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .about-quote blockquote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+    color: var(--navy);
+    line-height: 1.5;
+    margin: 16px 0 20px;
+  }
+  .about-quote-by {
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  /* Operational experience items */
+  .oper-items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .oper-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .92rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .oper-ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--accent-050);
+    color: var(--accent-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  @media(max-width: 680px) {
+    .mv-grid { grid-template-columns: 1fr; }
+    .oper-items { grid-template-columns: 1fr; }
+  }
+</style>

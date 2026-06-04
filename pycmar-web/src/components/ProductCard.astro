@@ -1,6 +1,6 @@
 ---
 import { getImageUrl } from '../lib/supabase';
-import { pName } from '../lib/i18n';
+import { pName, translateOrigin } from '../lib/i18n';
 import type { Lang } from '../lib/i18n';
 import type { Product } from '../lib/types';
 
@@ -12,9 +12,11 @@ interface Props {
 const { product: p, lang = 'es' } = Astro.props;
 const name = pName(p, lang);
 const mainImg = p.images?.find(i => i.is_main) ?? p.images?.[0] ?? null;
-const catName = lang === 'es'
+const catName = lang === 'zh'
+  ? ((p.category as any)?.name_zh ?? (p.category as any)?.name_en ?? (p.category as any)?.name_es)
+  : lang === 'es'
   ? (p.category as any)?.name_es
-  : (p.category as any)?.name_en ?? (p.category as any)?.name_es;
+  : ((p.category as any)?.name_en ?? (p.category as any)?.name_es);
 ---
 
 <a href={`/catalogo/${p.slug}`} class="pcard" style="text-decoration:none;">
@@ -38,7 +40,7 @@ const catName = lang === 'es'
     <h3>{name}</h3>
     {(p.origin || p.fao_zone) && (
       <div class="meta">
-        {p.origin && <span>{p.origin}</span>}
+        {p.origin && <span>{translateOrigin(p.origin, lang)}</span>}
         {p.origin && p.fao_zone && <span class="dot"></span>}
         {p.fao_zone && <span>FAO {p.fao_zone}</span>}
       </div>
@@ -52,6 +54,9 @@ const catName = lang === 'es'
         class="pcard-add"
         data-id={p.id}
         data-name={name}
+        data-name-es={p.name_es}
+        data-name-en={p.name_en}
+        data-name-zh={p.name_zh || ''}
         data-price={p.price}
         aria-label="Agregar"
         onclick="event.preventDefault(); _addToCart(this);"
@@ -69,10 +74,13 @@ const catName = lang === 'es'
     const b = btn as HTMLButtonElement;
     const id = b.dataset.id!;
     const name = b.dataset.name!;
+    const name_es = b.dataset.nameEs || name;
+    const name_en = b.dataset.nameEn || name;
+    const name_zh = b.dataset.nameZh || '';
     const price = parseFloat(b.dataset.price!);
     const cart = JSON.parse(localStorage.getItem('pycmar_cart') || '[]');
     const existing = cart.find((i: any) => i.id === id);
-    if (existing) { existing.qty += 1; } else { cart.push({ id, name, price, qty: 1, mode: 'buy' }); }
+    if (existing) { existing.qty += 1; } else { cart.push({ id, name, name_es, name_en, name_zh, price, qty: 1, mode: 'buy' }); }
     localStorage.setItem('pycmar_cart', JSON.stringify(cart));
     const total = cart.reduce((s: number, i: any) => s + i.qty, 0);
     const badge = document.getElementById('cart-count');

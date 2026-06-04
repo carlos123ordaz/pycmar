@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { createSupabaseServer } from '../../lib/supabase';
-import { t, catName } from '../../lib/i18n';
+import { t, catName, translateFormat, translateOrigin } from '../../lib/i18n';
 import type { Product, Category } from '../../lib/types';
 
 const lang = Astro.locals.lang;
@@ -24,11 +24,11 @@ const { data: categoriesData } = await supabase
 // Fetch all active products (with category join for client-side cat filter)
 let query = supabase
   .from('products')
-  .select('*, images:product_images(*), category:categories(name_es,name_en,slug)')
+  .select('*, images:product_images(*), category:categories(name_es,name_en,name_zh,slug)')
   .eq('active', true);
 
 if (tagParam) query = (query as any).contains('tags', [tagParam]);
-if (qParam)   query = (query as any).or(`name_es.ilike.%${qParam}%,name_en.ilike.%${qParam}%`);
+if (qParam)   query = (query as any).or(`name_es.ilike.%${qParam}%,name_en.ilike.%${qParam}%,name_zh.ilike.%${qParam}%`);
 
 if (sortParam === 'price_lo') query = (query as any).order('price', { ascending: true });
 else if (sortParam === 'price_hi') query = (query as any).order('price', { ascending: false });
@@ -146,7 +146,7 @@ const labelVerRes  = lang === 'zh' ? '查看结果' : lang === 'en' ? 'View resu
                 <span class="box">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
                 </span>
-                <span class={`tag tag-${fmt}`}>{fmt}</span>
+                <span class={`tag tag-${fmt}`}>{translateFormat(fmt, lang)}</span>
               </a>
             );
           })}
@@ -167,7 +167,7 @@ const labelVerRes  = lang === 'zh' ? '查看结果' : lang === 'en' ? 'View resu
                   <span class="box">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
                   </span>
-                  {origin}
+                  {translateOrigin(origin, lang)}
                 </a>
               );
             })}
@@ -226,13 +226,13 @@ const labelVerRes  = lang === 'zh' ? '查看结果' : lang === 'en' ? 'View resu
             )}
             {tagParam && (
               <a href={buildUrl({ ...currentParams, formato: '' })} class="chip active">
-                {tagParam}
+                {translateFormat(tagParam, lang)}
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </a>
             )}
             {origenParam && (
               <a href={buildUrl({ ...currentParams, origen: '' })} class="chip active">
-                {origenParam}
+                {translateOrigin(origenParam, lang)}
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </a>
             )}
