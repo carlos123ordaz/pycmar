@@ -140,6 +140,16 @@ const isActive = (href: string) =>
 </div>
 
 <script>
+  // Cart bounce on fly-to-cart arrival
+  document.addEventListener('cart-bounce', () => {
+    const btn = document.getElementById('cart-open-btn');
+    if (!btn) return;
+    btn.classList.remove('cart-popping');
+    void (btn as HTMLElement).offsetWidth;
+    btn.classList.add('cart-popping');
+    btn.addEventListener('animationend', () => btn.classList.remove('cart-popping'), { once: true });
+  });
+
   // Mobile menu
   document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
     (document.getElementById('mobile-menu') as HTMLElement).style.display = 'block';
@@ -211,6 +221,18 @@ const isActive = (href: string) =>
 </script>
 
 <style>
+  @keyframes cart-pop {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(1.45); }
+    55%  { transform: scale(0.88); }
+    78%  { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
+  #cart-open-btn.cart-popping {
+    animation: cart-pop 0.42s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
   @media(max-width:900px) {
     .nav { display: none; }
     .search-wrap { display: none; }
