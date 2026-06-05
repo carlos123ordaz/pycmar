@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../lib/i18n';
+
+const lang = Astro.locals.lang;
+const isEs = lang === 'es';
+const isZh = lang === 'zh';
+
+const title = isEs ? 'Libro de Reclamaciones — Pycmar' : isZh ? '投诉登记 — Pycmar' : 'Complaints Book — Pycmar';
+const desc  = isEs
+  ? 'Presenta tu queja o reclamo a Pycmar. Conforme a la Ley N.° 29571.'
+  : isZh
+  ? '向Pycmar提交您的投诉或意见。根据第29571号法律。'
+  : 'Submit your complaint or grievance to Pycmar. In accordance with Law No. 29571.';
+
+const h1      = isEs ? 'Libro de Reclamaciones' : isZh ? '投诉登记簿' : 'Complaints Book';
+const sub     = isEs
+  ? 'Conforme a la Ley N.° 29571 — Código de Protección y Defensa del Consumidor'
+  : isZh
+  ? '根据第29571号法律 — 消费者保护法典'
+  : 'In accordance with Law No. 29571 — Consumer Protection and Defence Code';
+const infoBox = isEs
+  ? 'Tienes derecho a presentar un reclamo o queja. Un <strong>reclamo</strong> es la disconformidad relacionada con los productos o servicios. Una <strong>queja</strong> es la disconformidad con la atención al cliente.'
+  : isZh
+  ? '您有权提交<strong>投诉</strong>（针对产品或服务）或<strong>意见</strong>（针对客户服务）。'
+  : 'You have the right to file a <strong>complaint</strong> (dissatisfaction with products or services) or a <strong>grievance</strong> (dissatisfaction with customer service).';
+
+const sendingLabel   = isEs ? 'Enviando…'       : isZh ? '发送中…'   : 'Sending…';
+const successTitle   = isEs ? 'Reclamo registrado' : isZh ? '投诉已登记' : 'Complaint registered';
+const successText    = isEs
+  ? 'Hemos recibido tu reclamo. Te responderemos en un plazo máximo de <strong>30 días calendario</strong> al correo indicado.'
+  : isZh
+  ? '我们已收到您的投诉，将在<strong>30个日历日</strong>内通过您提供的邮箱答复您。'
+  : 'We have received your complaint. We will respond within a maximum of <strong>30 calendar days</strong> to the email address provided.';
+const errorLabel     = isEs
+  ? 'Ocurrió un error al enviar. Intenta nuevamente o escríbenos por WhatsApp.'
+  : isZh
+  ? '发送时出错，请重试或通过WhatsApp联系我们。'
+  : 'An error occurred while sending. Please try again or contact us via WhatsApp.';
+---
+
+<BaseLayout title={title} description={desc}>
+  <main class="legal-page">
+    <div class="wrap">
+
+      <div class="libro-header">
+        <div class="libro-badge">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>{h1}</h1>
+          <p class="libro-sub">{sub}</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <p set:html={infoBox} />
+      </div>
+
+      <form class="reclamo-form" id="form-reclamo">
+        <h2>{t('claims_consumer', lang)}</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="nombre">{isEs ? 'Nombre completo' : isZh ? '姓名' : 'Full name'} *</label>
+            <input type="text" id="nombre" name="nombre" required placeholder={isEs ? 'Tu nombre y apellidos' : isZh ? '您的姓名' : 'Your full name'} />
+          </div>
+          <div class="field">
+            <label for="dni">{isEs ? 'DNI / RUC' : isZh ? '证件号码' : 'ID / Tax No.'} *</label>
+            <input type="text" id="dni" name="dni" required placeholder={isEs ? 'Número de documento' : isZh ? '证件号码' : 'Document number'} />
+          </div>
+          <div class="field">
+            <label for="email">{isEs ? 'Correo electrónico' : isZh ? '电子邮件' : 'Email'} *</label>
+            <input type="email" id="email" name="email" required placeholder="tu@correo.com" />
+          </div>
+          <div class="field">
+            <label for="telefono">{isEs ? 'Teléfono' : isZh ? '电话' : 'Phone'} *</label>
+            <input type="tel" id="telefono" name="telefono" required placeholder="+51 xxx xxx xxx" />
+          </div>
+          <div class="field full">
+            <label for="direccion">{isEs ? 'Dirección' : isZh ? '地址' : 'Address'}</label>
+            <input type="text" id="direccion" name="direccion" placeholder={isEs ? 'Dirección de referencia' : isZh ? '参考地址' : 'Reference address'} />
+          </div>
+        </div>
+
+        <h2>{t('claims_detail', lang)}</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="tipo">{isEs ? 'Tipo' : isZh ? '类型' : 'Type'} *</label>
+            <select id="tipo" name="tipo" required>
+              <option value="">{isEs ? 'Seleccionar…' : isZh ? '请选择…' : 'Select…'}</option>
+              <option value="reclamo">{t('claims_type_claim', lang)}</option>
+              <option value="queja">{t('claims_type_complaint', lang)}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fecha">{t('claims_incident', lang)} *</label>
+            <input type="date" id="fecha" name="fecha" required />
+          </div>
+          <div class="field full">
+            <label for="producto">{isEs ? 'Producto o servicio involucrado' : isZh ? '涉及的产品或服务' : 'Product or service involved'}</label>
+            <input type="text" id="producto" name="producto" placeholder={isEs ? 'Ej: Pota entera congelada 1 kg' : isZh ? '例：冷冻整只巨型鱿鱼1公斤' : 'E.g. Whole frozen giant squid 1 kg'} />
+          </div>
+          <div class="field full">
+            <label for="descripcion">{isEs ? 'Descripción del reclamo / queja' : isZh ? '投诉/意见描述' : 'Description of complaint / grievance'} *</label>
+            <textarea id="descripcion" name="descripcion" required rows="5" placeholder={isEs ? 'Describe con detalle lo ocurrido…' : isZh ? '请详细描述发生的情况…' : 'Describe in detail what happened…'}></textarea>
+          </div>
+          <div class="field full">
+            <label for="pedido">{t('claims_solution', lang)}</label>
+            <textarea id="pedido" name="pedido" rows="3" placeholder={isEs ? 'Ej: Reposición del producto, devolución…' : isZh ? '例：更换产品、退款…' : 'E.g. Product replacement, refund…'}></textarea>
+          </div>
+        </div>
+
+        <p class="legal-note">{t('claims_note', lang)}</p>
+        <button type="submit" class="btn btn-primary">{t('claims_submit', lang)}</button>
+        <p id="error-msg" class="error-msg" hidden>{errorLabel}</p>
+      </form>
+
+      <div id="success-msg" class="success-msg" hidden>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <h2>{successTitle}</h2>
+        <p set:html={successText} />
+      </div>
+
+      <div class="contacto-alt">
+        <p>{t('claims_alt', lang)}</p>
+        <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a>
+        &nbsp;·&nbsp;
+        <a href="https://wa.me/51987486981" target="_blank" rel="noopener">WhatsApp +51 987 486 981</a>
+      </div>
+
+    </div>
+  </main>
+</BaseLayout>
+
+<script define:vars={{ sendingLabel, claimsSubmit: t('claims_submit', lang) }}>
+  const form = document.getElementById('form-reclamo');
+  const btn = form?.querySelector('button[type="submit"]');
+  const successMsg = document.getElementById('success-msg');
+  const errorMsg = document.getElementById('error-msg');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+
+    btn.disabled = true;
+    btn.textContent = sendingLabel;
+    errorMsg.hidden = true;
+
+    try {
+      const body = encodeURIComponent(
+        `Libro de Reclamaciones — Pycmar\n\n` +
+        `Nombre: ${data.nombre}\nDNI/RUC: ${data.dni}\nEmail: ${data.email}\nTeléfono: ${data.telefono}\nDirección: ${data.direccion}\n\n` +
+        `Tipo: ${data.tipo}\nFecha: ${data.fecha}\nProducto: ${data.producto}\n\n` +
+        `Descripción:\n${data.descripcion}\n\nSolución esperada:\n${data.pedido}`
+      );
+      window.location.href = `mailto:pycmarperu@gmail.com?subject=Libro%20de%20Reclamaciones%20-%20${data.tipo}&body=${body}`;
+      form.hidden = true;
+      successMsg.hidden = false;
+    } catch {
+      errorMsg.hidden = false;
+      btn.disabled = false;
+      btn.textContent = claimsSubmit;
+    }
+  });
+</script>
+
+<style>
+  .legal-page { padding: 80px 0 100px; min-height: 60vh; }
+  .libro-header { display: flex; align-items: center; gap: 18px; margin-bottom: 32px; }
+  .libro-badge {
+    width: 64px; height: 64px; border-radius: 14px;
+    background: var(--navy); color: #fff;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); color: var(--navy); margin: 0 0 4px; }
+  .libro-sub { color: var(--slate); font-size: .9rem; margin: 0; }
+  .info-box {
+    background: #EFF6FF; border-left: 4px solid var(--teal);
+    padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 40px;
+  }
+  .info-box p { margin: 0; color: #1e3a5f; font-size: .95rem; line-height: 1.6; }
+  .reclamo-form h2 { font-size: 1.05rem; color: var(--navy); margin: 32px 0 16px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  label { font-size: .85rem; font-weight: 600; color: #374151; }
+  input, select, textarea {
+    border: 1.5px solid #d1d5db; border-radius: 8px; padding: 10px 14px;
+    font-size: .95rem; color: #111; outline: none; transition: border-color .15s;
+    font-family: inherit; width: 100%; box-sizing: border-box;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--teal); }
+  textarea { resize: vertical; }
+  .legal-note { font-size: .82rem; color: var(--slate); margin: 24px 0 20px; }
+  .btn-primary {
+    background: var(--navy); color: #fff; border: none;
+    padding: 13px 32px; border-radius: 8px; font-size: 1rem;
+    font-weight: 700; cursor: pointer; transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: .88; }
+  .error-msg { color: #dc2626; font-size: .88rem; margin-top: 10px; }
+  .success-msg {
+    text-align: center; padding: 56px 24px;
+    color: var(--navy);
+  }
+  .success-msg svg { stroke: #059669; margin-bottom: 16px; }
+  .success-msg h2 { font-size: 1.4rem; margin-bottom: 10px; }
+  .success-msg p { color: #374151; font-size: .97rem; line-height: 1.7; }
+  .contacto-alt { margin-top: 48px; padding-top: 32px; border-top: 1px solid #e5e7eb; color: var(--slate); font-size: .9rem; }
+  .contacto-alt a { color: var(--teal); }
+  @media(max-width:600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .libro-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>

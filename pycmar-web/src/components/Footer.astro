@@ -86,6 +86,14 @@ const { lang } = Astro.props;
 
     </div>
 
+    <div class="footer-legal">
+      <a href="/privacidad">{t('legal_privacy', lang)}</a>
+      <a href="/envio">{t('legal_shipping', lang)}</a>
+      <a href="/terminos">{t('legal_terms', lang)}</a>
+      <a href="/reclamaciones">{t('legal_claims', lang)}</a>
+      <a href="/zonas-despacho">{t('legal_zones', lang)}</a>
+    </div>
+
     <div class="footer-bottom">
       <span>© {new Date().getFullYear()} Pycmar Export Perú. {t('footer_rights', lang)}</span>
       <div class="socials">
@@ -112,10 +120,26 @@ const { lang } = Astro.props;
 </footer>
 
 <style>
+  .footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    padding: 18px 0;
+    border-top: 1px solid rgba(255,255,255,.1);
+    margin-top: 0;
+  }
+  .footer-legal a {
+    font-size: .78rem;
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .footer-legal a:hover { color: var(--teal); }
   @media(max-width:900px) {
     .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 32px; }
   }
   @media(max-width:560px) {
     .footer-grid { grid-template-columns: 1fr !important; }
+    .footer-legal { gap: 6px 14px; }
   }
 </style>

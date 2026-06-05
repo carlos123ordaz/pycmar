@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../lib/i18n';
+
+const lang = Astro.locals.lang;
+const isEs = lang === 'es';
+const isZh = lang === 'zh';
+
+const title = isEs ? 'Políticas de Envío — Pycmar' : isZh ? '配送政策 — Pycmar' : 'Shipping Policy — Pycmar';
+const desc  = isEs
+  ? 'Conoce las condiciones de entrega y envío de los productos Pycmar en el mercado local.'
+  : isZh
+  ? '了解Pycmar产品的本地配送条件和送货政策。'
+  : 'Learn about Pycmar\'s delivery and shipping conditions for the local market.';
+
+const sections = [
+  {
+    es_h: '1. Cobertura de entrega',
+    en_h: '1. Delivery Coverage',
+    zh_h: '1. 配送范围',
+    es_b: 'Realizamos entregas a domicilio dentro de las zonas habilitadas en la región Piura. Consulta las <a href="/zonas-despacho">Zonas de Despacho</a> para verificar si tu dirección está dentro de nuestra cobertura.',
+    en_b: 'We deliver to homes within our enabled zones in the Piura region. Check our <a href="/zonas-despacho">Delivery Zones</a> to verify if your address is within our coverage area.',
+    zh_b: '我们在皮乌拉地区的指定区域内提供上门配送服务。请查看我们的<a href="/zonas-despacho">配送区域</a>以确认您的地址是否在覆盖范围内。',
+  },
+  {
+    es_h: '2. Plazos de entrega',
+    en_h: '2. Delivery Lead Times',
+    zh_h: '2. 配送时效',
+    es_b: '<strong>Piura y Castilla:</strong> 24–48 horas hábiles tras confirmación de pago.<br/><strong>Otras zonas habilitadas:</strong> 48–72 horas hábiles.<br/>Los pedidos realizados después de las 3:00 p.m. se procesan el siguiente día hábil.',
+    en_b: '<strong>Piura and Castilla:</strong> 24–48 business hours after payment confirmation.<br/><strong>Other enabled zones:</strong> 48–72 business hours.<br/>Orders placed after 3:00 p.m. are processed the following business day.',
+    zh_b: '<strong>皮乌拉和卡斯蒂利亚：</strong>付款确认后24–48个工作小时。<br/><strong>其他配送区域：</strong>48–72个工作小时。<br/>下午3点后下单将于下一个工作日处理。',
+  },
+  {
+    es_h: '3. Condiciones del producto',
+    en_h: '3. Product Conditions',
+    zh_h: '3. 产品条件',
+    es_b: 'Todos nuestros productos se entregan congelados a −18 °C en cadena de frío. El cliente debe mantener la cadena de frío una vez recibido el pedido. Pycmar no se responsabiliza por deterioro del producto si la cadena de frío no se mantiene tras la entrega.',
+    en_b: 'All our products are delivered frozen at −18 °C within the cold chain. The customer must maintain the cold chain once the order is received. Pycmar is not responsible for product deterioration if the cold chain is not maintained after delivery.',
+    zh_b: '我们所有产品均在冷链下以−18°C冷冻状态配送。客户收到订单后必须保持冷链。如收货后未保持冷链导致产品变质，Pycmar不承担责任。',
+  },
+  {
+    es_h: '4. Costo de envío',
+    en_h: '4. Shipping Cost',
+    zh_h: '4. 配送费用',
+    es_b: 'El costo de envío se calcula según la zona de entrega y el volumen del pedido. Puedes consultarlo al generar tu pedido o contactarnos por WhatsApp. Los pedidos que superen el monto mínimo establecido pueden calificar para envío gratuito.',
+    en_b: 'Shipping costs are calculated based on the delivery zone and order volume. You can check the exact cost when placing your order or contact us via WhatsApp. Orders exceeding the minimum amount may qualify for free shipping.',
+    zh_b: '配送费用根据配送区域和订单量计算。您可以在下单时查看确切费用，或通过WhatsApp联系我们。超过最低金额的订单可能享受免费配送。',
+  },
+  {
+    es_h: '5. Recepción del pedido',
+    en_h: '5. Order Receipt',
+    zh_h: '5. 收货',
+    es_b: 'Al momento de la entrega, verifica que el pedido esté completo y en buen estado. Cualquier observación debe comunicarse al repartidor en el momento de la recepción o contactarnos dentro de las 2 horas siguientes.',
+    en_b: 'At the time of delivery, verify that the order is complete and in good condition. Any issues must be communicated to the delivery person at the time of receipt or reported to us within 2 hours.',
+    zh_b: '收货时，请确认订单完整且状态良好。任何问题必须在收货时告知送货员，或在收货后2小时内联系我们。',
+  },
+  {
+    es_h: '6. Pedidos para exportación',
+    en_h: '6. Export Orders',
+    zh_h: '6. 出口订单',
+    es_b: 'Las condiciones de despacho para pedidos de exportación (contenedores reefer, FCL/LCL) se acuerdan individualmente durante la cotización. Visita nuestra sección de <a href="/exportacion">Exportación</a> o <a href="/contacto">contáctanos</a>.',
+    en_b: 'Dispatch conditions for export orders (reefer containers, FCL/LCL) are agreed individually during the quoting process. Visit our <a href="/exportacion">Export</a> section or <a href="/contacto">contact us</a>.',
+    zh_b: '出口订单（冷藏集装箱，FCL/LCL）的发货条件在报价过程中单独协商。请访问我们的<a href="/exportacion">出口业务</a>页面或<a href="/contacto">联系我们</a>。',
+  },
+  {
+    es_h: '7. Casos de fuerza mayor',
+    en_h: '7. Force Majeure',
+    zh_h: '7. 不可抗力',
+    es_b: 'Pycmar no se hace responsable por demoras ocasionadas por fenómenos naturales, bloqueos de vías, huelgas u otros eventos fuera de nuestro control. En estos casos, coordinaremos la entrega en la fecha más próxima disponible.',
+    en_b: 'Pycmar is not responsible for delays caused by natural disasters, road blockages, strikes or other events beyond our control. In such cases, we will coordinate delivery on the nearest available date.',
+    zh_b: 'Pycmar对因自然灾害、道路封锁、罢工或其他不可控事件造成的延误不承担责任。在这些情况下，我们将协商最近可用日期进行配送。',
+  },
+];
+---
+
+<BaseLayout title={title} description={desc}>
+  <main class="legal-page">
+    <div class="wrap">
+      <h1>{t('legal_shipping', lang)}</h1>
+      <p class="updated">{t('legal_updated', lang)} {isEs ? 'junio 2025' : isZh ? '2025年6月' : 'June 2025'}</p>
+
+      {sections.map(s => (
+        <section>
+          <h2>{isEs ? s.es_h : isZh ? s.zh_h : s.en_h}</h2>
+          <p set:html={isEs ? s.es_b : isZh ? s.zh_b : s.en_b} />
+        </section>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .legal-page { padding: 80px 0 100px; min-height: 60vh; }
+  .legal-page h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); color: var(--navy); margin-bottom: 6px; }
+  .updated { color: var(--slate); font-size: .9rem; margin-bottom: 48px; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.1rem; color: var(--navy); margin-bottom: 10px; }
+  p { color: #374151; line-height: 1.75; font-size: .97rem; }
+  a { color: var(--teal); }
+</style>

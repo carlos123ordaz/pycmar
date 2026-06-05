@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../lib/i18n';
+
+const lang = Astro.locals.lang;
+const isEs = lang === 'es';
+const isZh = lang === 'zh';
+
+const title = isEs ? 'Políticas de Privacidad — Pycmar' : isZh ? '隐私政策 — Pycmar' : 'Privacy Policy — Pycmar';
+const desc  = isEs
+  ? 'Conoce cómo Pycmar recopila, usa y protege tu información personal.'
+  : isZh
+  ? '了解Pycmar如何收集、使用和保护您的个人信息。'
+  : 'Learn how Pycmar collects, uses and protects your personal information.';
+
+const sections = [
+  {
+    es_h: '1. Responsable del tratamiento',
+    en_h: '1. Data Controller',
+    zh_h: '1. 数据控制者',
+    es_b: 'PYCMAR EXPORT PERÚ S.A.C., con RUC 20607890123, con domicilio en Castilla, Piura, Perú. Correo: <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a>.',
+    en_b: 'PYCMAR EXPORT PERÚ S.A.C., RUC 20607890123, based in Castilla, Piura, Peru. Contact: <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a>.',
+    zh_b: 'PYCMAR EXPORT PERÚ S.A.C.，RUC 20607890123，地址：秘鲁皮乌拉卡斯蒂利亚。邮箱：<a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a>。',
+  },
+  {
+    es_h: '2. Datos que recopilamos',
+    en_h: '2. Data We Collect',
+    zh_h: '2. 我们收集的数据',
+    es_b: 'Podemos recopilar: nombre y apellidos, correo electrónico, teléfono, empresa y cargo (clientes de exportación), y dirección de entrega (pedidos locales).',
+    en_b: 'We may collect: full name, email address, phone number, company and job title (export clients), and delivery address (local orders).',
+    zh_b: '我们可能收集：姓名、电子邮件、电话号码、公司及职位（出口客户）以及送货地址（本地订单）。',
+  },
+  {
+    es_h: '3. Finalidad del tratamiento',
+    en_h: '3. Purpose of Processing',
+    zh_h: '3. 处理目的',
+    es_b: 'Tus datos se usan exclusivamente para: responder consultas y cotizaciones, procesar pedidos, enviar información comercial (solo con tu consentimiento) y cumplir obligaciones legales.',
+    en_b: 'Your data is used exclusively to: respond to enquiries and quotes, process orders, send commercial information (only with your consent), and fulfil legal obligations.',
+    zh_b: '您的数据仅用于：回复咨询和报价、处理订单、发送商业信息（仅在您同意的情况下）以及履行法律义务。',
+  },
+  {
+    es_h: '4. Compartición de datos',
+    en_h: '4. Data Sharing',
+    zh_h: '4. 数据共享',
+    es_b: 'No vendemos ni cedemos tus datos a terceros. Solo los compartimos con proveedores logísticos necesarios para la entrega, bajo acuerdos de confidencialidad.',
+    en_b: 'We do not sell or transfer your data to third parties. We only share it with logistics providers necessary for delivery, under confidentiality agreements.',
+    zh_b: '我们不出售或转让您的数据给第三方。仅在保密协议下与配送所需的物流服务商共享。',
+  },
+  {
+    es_h: '5. Tus derechos',
+    en_h: '5. Your Rights',
+    zh_h: '5. 您的权利',
+    es_b: 'Conforme a la Ley N.° 29733 (Ley de Protección de Datos Personales del Perú), tienes derecho a acceder, rectificar, cancelar u oponerte al tratamiento de tus datos. Escríbenos a <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a>.',
+    en_b: 'Under Peruvian Law No. 29733 (Personal Data Protection Act), you have the right to access, rectify, cancel or object to the processing of your data. Write to us at <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a>.',
+    zh_b: '根据秘鲁第29733号法律（个人数据保护法），您有权访问、更正、删除或反对处理您的数据。请发送邮件至 <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a>。',
+  },
+  {
+    es_h: '6. Seguridad',
+    en_h: '6. Security',
+    zh_h: '6. 安全性',
+    es_b: 'Aplicamos medidas técnicas y organizativas razonables para proteger tu información contra accesos no autorizados, pérdida o divulgación indebida.',
+    en_b: 'We apply reasonable technical and organisational measures to protect your information against unauthorised access, loss or improper disclosure.',
+    zh_b: '我们采取合理的技术和组织措施，保护您的信息免受未经授权的访问、丢失或不当披露。',
+  },
+  {
+    es_h: '7. Cookies',
+    en_h: '7. Cookies',
+    zh_h: '7. Cookie',
+    es_b: 'Nuestro sitio puede usar cookies de sesión para mejorar la navegación. No utilizamos cookies de rastreo de terceros con fines publicitarios.',
+    en_b: 'Our site may use session cookies to improve navigation. We do not use third-party tracking cookies for advertising purposes.',
+    zh_b: '我们的网站可能使用会话Cookie以改善浏览体验。我们不使用第三方广告追踪Cookie。',
+  },
+  {
+    es_h: '8. Cambios a esta política',
+    en_h: '8. Changes to This Policy',
+    zh_h: '8. 政策变更',
+    es_b: 'Podemos actualizar esta política en cualquier momento. La versión vigente estará siempre disponible en esta página con la fecha de última actualización.',
+    en_b: 'We may update this policy at any time. The current version will always be available on this page with the last updated date.',
+    zh_b: '我们可能随时更新本政策。最新版本将始终显示在本页面并注明更新日期。',
+  },
+];
+---
+
+<BaseLayout title={title} description={desc}>
+  <main class="legal-page">
+    <div class="wrap">
+      <h1>{t('legal_privacy', lang)}</h1>
+      <p class="updated">{t('legal_updated', lang)} {isEs ? 'junio 2025' : isZh ? '2025年6月' : 'June 2025'}</p>
+
+      {sections.map(s => (
+        <section>
+          <h2>{isEs ? s.es_h : isZh ? s.zh_h : s.en_h}</h2>
+          <p set:html={isEs ? s.es_b : isZh ? s.zh_b : s.en_b} />
+        </section>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .legal-page { padding: 80px 0 100px; min-height: 60vh; }
+  .legal-page h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); color: var(--navy); margin-bottom: 6px; }
+  .updated { color: var(--slate); font-size: .9rem; margin-bottom: 48px; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.1rem; color: var(--navy); margin-bottom: 10px; }
+  p { color: #374151; line-height: 1.75; font-size: .97rem; }
+  a { color: var(--teal); }
+</style>

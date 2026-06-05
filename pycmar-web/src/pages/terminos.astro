@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../lib/i18n';
+
+const lang = Astro.locals.lang;
+const isEs = lang === 'es';
+const isZh = lang === 'zh';
+
+const title = isEs ? 'Términos y Condiciones — Pycmar' : isZh ? '条款与条件 — Pycmar' : 'Terms & Conditions — Pycmar';
+const desc  = isEs
+  ? 'Lee los términos y condiciones de uso del sitio web y de compra de productos Pycmar.'
+  : isZh
+  ? '阅读Pycmar网站使用和产品购买的条款与条件。'
+  : 'Read the terms and conditions for using the Pycmar website and purchasing products.';
+
+const sections = [
+  {
+    es_h: '1. Aceptación',
+    en_h: '1. Acceptance',
+    zh_h: '1. 接受',
+    es_b: 'Al acceder y utilizar el sitio web de PYCMAR EXPORT PERÚ S.A.C. (en adelante, "Pycmar"), el usuario acepta quedar vinculado por los presentes Términos y Condiciones.',
+    en_b: 'By accessing and using the PYCMAR EXPORT PERÚ S.A.C. website (hereinafter "Pycmar"), the user agrees to be bound by these Terms and Conditions.',
+    zh_b: '通过访问和使用PYCMAR EXPORT PERÚ S.A.C.（以下简称"Pycmar"）网站，用户同意受本条款与条件的约束。',
+  },
+  {
+    es_h: '2. Información del proveedor',
+    en_h: '2. Provider Information',
+    zh_h: '2. 提供商信息',
+    es_b: 'PYCMAR EXPORT PERÚ S.A.C. — RUC 20607890123 — Castilla, Piura, Perú.<br/>Correo: <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a> | Tel: <a href="tel:+51987486981">+51 987 486 981</a>',
+    en_b: 'PYCMAR EXPORT PERÚ S.A.C. — RUC 20607890123 — Castilla, Piura, Peru.<br/>Email: <a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a> | Tel: <a href="tel:+51987486981">+51 987 486 981</a>',
+    zh_b: 'PYCMAR EXPORT PERÚ S.A.C. — RUC 20607890123 — 秘鲁皮乌拉卡斯蒂利亚。<br/>邮箱：<a href="mailto:pycmarperu@gmail.com">pycmarperu@gmail.com</a> | 电话：<a href="tel:+51987486981">+51 987 486 981</a>',
+  },
+  {
+    es_h: '3. Productos y precios',
+    en_h: '3. Products and Prices',
+    zh_h: '3. 产品与价格',
+    es_b: 'Los precios incluyen IGV y están en soles peruanos (PEN), salvo indicación en moneda extranjera para exportación. Pycmar puede modificar precios sin previo aviso. El precio aplicable es el vigente al momento de confirmación del pedido.',
+    en_b: 'Prices include VAT and are in Peruvian soles (PEN), unless otherwise stated in foreign currency for export orders. Pycmar may modify prices without prior notice. The applicable price is the one in effect at the time of order confirmation.',
+    zh_b: '价格含增值税，以秘鲁索尔（PEN）计，出口订单另有说明除外。Pycmar可随时修改价格，恕不另行通知。适用价格以订单确认时的现行价格为准。',
+  },
+  {
+    es_h: '4. Proceso de compra',
+    en_h: '4. Purchase Process',
+    zh_h: '4. 购买流程',
+    es_b: 'El pedido se considera confirmado una vez que Pycmar envíe la confirmación por escrito (correo o WhatsApp) y se haya realizado el pago o acordado las condiciones de crédito correspondientes.',
+    en_b: 'An order is considered confirmed once Pycmar sends written confirmation (email or WhatsApp) and payment has been made or credit terms agreed.',
+    zh_b: '订单在Pycmar发送书面确认（电子邮件或WhatsApp）并完成付款或达成信用条款后视为确认。',
+  },
+  {
+    es_h: '5. Formas de pago',
+    en_h: '5. Payment Methods',
+    zh_h: '5. 支付方式',
+    es_b: 'Transferencia bancaria · Yape · Plin · Efectivo contra entrega (pedidos locales habilitados) · Condiciones de crédito para clientes de exportación.',
+    en_b: 'Bank transfer · Yape · Plin · Cash on delivery (enabled local orders) · Credit terms for export clients.',
+    zh_b: '银行转账 · Yape · Plin · 货到付款（仅限本地已启用订单）· 出口客户信用条款。',
+  },
+  {
+    es_h: '6. Devoluciones y reclamaciones',
+    en_h: '6. Returns and Complaints',
+    zh_h: '6. 退货与投诉',
+    es_b: 'El cliente debe comunicarse con Pycmar dentro de las 24 horas posteriores a la recepción, adjuntando evidencia fotográfica. Pycmar evaluará cada caso y coordinará la reposición o devolución si procede. También puedes usar nuestro <a href="/reclamaciones">Libro de Reclamaciones</a>.',
+    en_b: 'The customer must contact Pycmar within 24 hours of receipt, with photographic evidence. Pycmar will evaluate each case and coordinate a replacement or refund if appropriate. You may also use our <a href="/reclamaciones">Complaints Book</a>.',
+    zh_b: '客户必须在收货后24小时内联系Pycmar，并附上照片证据。Pycmar将评估每个案例，并在适当情况下协调换货或退款。您也可以使用我们的<a href="/reclamaciones">投诉登记</a>。',
+  },
+  {
+    es_h: '7. Propiedad intelectual',
+    en_h: '7. Intellectual Property',
+    zh_h: '7. 知识产权',
+    es_b: 'Todos los contenidos del sitio (textos, imágenes, logotipos, diseño) son propiedad de Pycmar o de sus respectivos titulares. Queda prohibida su reproducción sin autorización expresa.',
+    en_b: 'All site content (text, images, logos, design) is the property of Pycmar or its respective owners. Reproduction without express authorisation is prohibited.',
+    zh_b: '网站所有内容（文字、图片、标志、设计）均为Pycmar或其各自所有者的财产。未经明确授权，禁止复制。',
+  },
+  {
+    es_h: '8. Ley aplicable',
+    en_h: '8. Applicable Law',
+    zh_h: '8. 适用法律',
+    es_b: 'Estos Términos se rigen por las leyes de la República del Perú. Cualquier controversia se someterá a los tribunales competentes de la ciudad de Piura, Perú.',
+    en_b: 'These Terms are governed by the laws of the Republic of Peru. Any dispute shall be submitted to the competent courts of the city of Piura, Peru.',
+    zh_b: '本条款受秘鲁共和国法律管辖。任何争议应提交秘鲁皮乌拉市有管辖权的法院解决。',
+  },
+];
+---
+
+<BaseLayout title={title} description={desc}>
+  <main class="legal-page">
+    <div class="wrap">
+      <h1>{t('legal_terms', lang)}</h1>
+      <p class="updated">{t('legal_updated', lang)} {isEs ? 'junio 2025' : isZh ? '2025年6月' : 'June 2025'}</p>
+
+      {sections.map(s => (
+        <section>
+          <h2>{isEs ? s.es_h : isZh ? s.zh_h : s.en_h}</h2>
+          <p set:html={isEs ? s.es_b : isZh ? s.zh_b : s.en_b} />
+        </section>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .legal-page { padding: 80px 0 100px; min-height: 60vh; }
+  .legal-page h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); color: var(--navy); margin-bottom: 6px; }
+  .updated { color: var(--slate); font-size: .9rem; margin-bottom: 48px; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.1rem; color: var(--navy); margin-bottom: 10px; }
+  p { color: #374151; line-height: 1.75; font-size: .97rem; }
+  a { color: var(--teal); }
+</style>
