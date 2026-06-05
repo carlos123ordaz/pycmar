@@ -70,6 +70,44 @@ const catName = lang === 'zh'
 </a>
 
 <script>
+  function _flyToCart(btn: HTMLButtonElement) {
+    const cart = document.getElementById('cart-open-btn');
+    if (!cart) return;
+    const btnRect = btn.getBoundingClientRect();
+    const cartRect = cart.getBoundingClientRect();
+    const startX = btnRect.left + btnRect.width / 2;
+    const startY = btnRect.top + btnRect.height / 2;
+    const endX = cartRect.left + cartRect.width / 2;
+    const endY = cartRect.top + cartRect.height / 2;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const arc = Math.max(40, Math.min(Math.abs(dx) * 0.4, 100));
+
+    const dot = document.createElement('div');
+    dot.style.cssText = `position:fixed;left:${startX}px;top:${startY}px;width:18px;height:18px;border-radius:50%;background:var(--accent-600,#0ea5e9);pointer-events:none;z-index:99999;transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,.3);`;
+    document.body.appendChild(dot);
+
+    const duration = 520;
+    const startTime = performance.now();
+
+    function easeInOut(t: number) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+
+    function step(now: number) {
+      const t = Math.min((now - startTime) / duration, 1);
+      const et = easeInOut(t);
+      const x = dx * et;
+      const y = dy * et - arc * Math.sin(t * Math.PI);
+      const scale = 1 - t * 0.55;
+      const opacity = t > 0.72 ? (1 - t) / 0.28 : 1;
+      dot.style.transform = `translate(calc(-50% + ${x}px),calc(-50% + ${y}px)) scale(${scale})`;
+      dot.style.opacity = String(opacity);
+      if (t < 1) { requestAnimationFrame(step); }
+      else { dot.remove(); document.dispatchEvent(new CustomEvent('cart-bounce')); }
+    }
+
+    requestAnimationFrame(step);
+  }
+
   function _addToCart(btn: Element) {
     const b = btn as HTMLButtonElement;
     const id = b.dataset.id!;
@@ -87,7 +125,9 @@ const catName = lang === 'zh'
     if (badge) { badge.textContent = String(total); badge.style.display = 'flex'; }
     b.classList.add('added');
     setTimeout(() => b.classList.remove('added'), 1500);
+    _flyToCart(b);
     document.dispatchEvent(new CustomEvent('cart-updated'));
   }
+
   (window as any)._addToCart = _addToCart;
 </script>
