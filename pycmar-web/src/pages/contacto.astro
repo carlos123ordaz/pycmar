@@ -1,36 +1,141 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { t } from '../lib/i18n';
+import { t, certs } from '../lib/i18n';
 
 const lang = Astro.locals.lang;
+const isEs = lang === 'es';
+const isZh = lang === 'zh';
 
-const countries = lang === 'es'
+const countries = isEs
   ? ['Perú','China','Estados Unidos','España','Japón','Italia','Corea del Sur','Otro']
-  : lang === 'zh'
+  : isZh
   ? ['中国','秘鲁','美国','西班牙','日本','意大利','韩国','其他']
   : ['Peru','China','United States','Spain','Japan','Italy','South Korea','Other'];
 
 const volumes = [t('vol_1', lang), t('vol_2', lang), t('vol_3', lang), t('vol_4', lang)];
 
-const pageTitle = lang === 'es' ? 'Contacto — Pycmar'
-  : lang === 'en' ? 'Contact — Pycmar'
-  : '联系我们 — Pycmar';
+const pageTitle = isEs ? 'Nosotros y Contacto — Pycmar'
+  : isZh ? '关于我们与联系 — Pycmar'
+  : 'About & Contact — Pycmar';
 ---
 
 <BaseLayout title={pageTitle} currentPath="/contacto">
 
-  <!-- Page header -->
-  <section class="section-tight" style="background:var(--mist);border-bottom:1px solid var(--line);">
+  <!-- ── COMPANY OVERVIEW (Nosotros) ────────────────────────────────────── -->
+  <section class="about-band">
     <div class="wrap">
-      <span class="eyebrow" style="display:block;margin-bottom:12px;">{t('nav_contact', lang)}</span>
-      <h1 class="h2">{t('contact_title', lang)}</h1>
-      <p class="lead" style="margin-top:10px;max-width:46ch;">{t('contact_sub', lang)}</p>
+      <div class="about-band-grid">
+
+        <!-- Text -->
+        <div>
+          <span class="eyebrow on-dark" style="display:block;margin-bottom:14px;">
+            {isEs ? 'Quiénes somos' : isZh ? '关于我们' : 'About us'}
+          </span>
+          <h1 class="display" style="font-size:clamp(2rem,4vw,3.2rem);color:#fff;margin-bottom:.5em;">
+            {isEs
+              ? <>{`Una empresa peruana que lleva `}<em style="color:#7ef0c4;font-style:normal;">{`el mar al mundo`}</em>.</>
+              : isZh
+              ? <>{`秘鲁企业`}<em style="color:#7ef0c4;font-style:normal;">{`走向世界`}</em></>
+              : <>{`A Peruvian company taking `}<em style="color:#7ef0c4;font-style:normal;">{`the sea to the world`}</em>.</>
+            }
+          </h1>
+          <p class="lead" style="color:#bcd0e6;max-width:50ch;margin-bottom:28px;">
+            {isEs
+              ? 'Exportamos productos hidrobiológicos congelados bajo los más altos estándares de calidad a mercados de Asia, Europa y América. Planta con habilitación HACCP, SANIPES y FDA.'
+              : isZh
+              ? '我们向亚洲、欧洲和美洲市场出口冷冻水产品，严格遵守最高质量标准（HACCP、SANIPES、FDA认证工厂）。'
+              : 'We export frozen hydrobiological products under the highest quality standards to markets in Asia, Europe and the Americas. HACCP, SANIPES and FDA certified plant.'}
+          </p>
+          <div class="market-row">
+            {certs[lang].slice(0, 4).map(c => <span class="market-tag">{c}</span>)}
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="about-stats-grid">
+          {[
+            { n: '35+',   l: isEs ? 'Especies en línea'   : isZh ? '产品种类'   : 'Species in line' },
+            { n: '6',     l: isEs ? 'Mercados de destino' : isZh ? '目标市场'   : 'Destination markets' },
+            { n: '−18°C', l: isEs ? 'Cadena de frío'      : isZh ? '冷链温度'   : 'Cold chain' },
+            { n: '100%',  l: isEs ? 'Trazabilidad'        : isZh ? '完整溯源'   : 'Full traceability' },
+          ].map(({ n, l }) => (
+            <div class="about-stat-card">
+              <div class="n">{n}</div>
+              <div class="l">{l}</div>
+            </div>
+          ))}
+        </div>
+
+      </div>
     </div>
   </section>
 
-  <!-- Form + info -->
+  <!-- ── VALUES (compact) ───────────────────────────────────────────────── -->
+  <section class="section-tight" style="background:var(--mist);border-bottom:1px solid var(--line);">
+    <div class="wrap">
+      <div class="values-row">
+        {[
+          {
+            icon: 'shield',
+            t_es: 'Calidad certificada', t_en: 'Certified quality', t_zh: '认证质量',
+            d_es: 'Plantas con HACCP, SANIPES y FDA. Control en cada lote.',
+            d_en: 'HACCP, SANIPES and FDA plants. Control in every batch.',
+            d_zh: 'HACCP、SANIPES和FDA认证，每批次严格管控。',
+          },
+          {
+            icon: 'snow',
+            t_es: 'Cadena de frío', t_en: 'Cold chain', t_zh: '冷链运输',
+            d_es: 'IQF y bloque a −18 °C, sin interrupción hasta el contenedor.',
+            d_en: 'IQF and block at −18 °C, unbroken to the container.',
+            d_zh: 'IQF和整块冷冻至-18°C，全程不中断至集装箱。',
+          },
+          {
+            icon: 'leaf',
+            t_es: 'Pesca responsable', t_en: 'Responsible sourcing', t_zh: '负责任捕捞',
+            d_es: 'Captura trazable respetando tallas y zonas FAO.',
+            d_en: 'Traceable catch respecting sizes and FAO zones.',
+            d_zh: '可追溯捕捞，遵守规格和FAO区域规定。',
+          },
+          {
+            icon: 'anchor',
+            t_es: 'Origen peruano', t_en: 'Peruvian origin', t_zh: '秘鲁原产',
+            d_es: 'Desde Paita y Lima al mundo con el sabor del mar peruano.',
+            d_en: 'From Paita and Lima to the world with Peruvian sea flavor.',
+            d_zh: '从派塔和利马到世界，带去秘鲁大海的风味。',
+          },
+        ].map(v => {
+          const title = isZh ? v.t_zh : (lang === 'en' ? v.t_en : v.t_es);
+          const desc  = isZh ? v.d_zh : (lang === 'en' ? v.d_en : v.d_es);
+          return (
+            <div class="val-card">
+              <div class="val-ic">
+                {v.icon === 'shield' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>}
+                {v.icon === 'snow'   && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><path d="m20 16-4-4 4-4M4 8l4 4-4 4M16 4l-4 4-4-4M8 20l4-4 4 4"/></svg>}
+                {v.icon === 'leaf'   && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M11 20A7 7 0 014.93 7.88C6.77 5.1 9.5 3.5 12 3.5c3.3 0 6.5 2 8 6-1 4-4 6.5-8 6.5h-1zm0 0v-6"/></svg>}
+                {v.icon === 'anchor' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0020 0h-3"/></svg>}
+              </div>
+              <div>
+                <h4 style="font-size:1rem;margin-bottom:5px;">{title}</h4>
+                <p style="font-size:.88rem;color:var(--gray);line-height:1.5;">{desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT FORM ────────────────────────────────────────────────────── -->
   <section class="section">
     <div class="wrap">
+
+      <!-- Section head -->
+      <div style="margin-bottom:clamp(30px,4vw,48px);">
+        <span class="eyebrow" style="display:block;margin-bottom:12px;">{t('nav_contact', lang)}</span>
+        <h2 class="h2">{t('contact_title', lang)}</h2>
+        <p class="lead" style="margin-top:10px;max-width:46ch;">{t('contact_sub', lang)}</p>
+      </div>
+
       <div style="display:grid;grid-template-columns:1.3fr .9fr;gap:clamp(30px,5vw,56px);align-items:start;" class="contact-grid">
 
         <!-- Form -->
@@ -49,11 +154,11 @@ const pageTitle = lang === 'es' ? 'Contacto — Pycmar'
             <div class="field-row">
               <div class="field">
                 <label>{t('form_name', lang)} <span class="req">*</span></label>
-                <input name="nombre" type="text" required placeholder={lang === 'es' ? 'Ej. María Quispe' : lang === 'zh' ? '例如：王芳' : 'e.g. Maria Quispe'} />
+                <input name="nombre" type="text" required placeholder={isEs ? 'Ej. María Quispe' : isZh ? '例如：王芳' : 'e.g. Maria Quispe'} />
               </div>
               <div class="field">
                 <label>{t('form_company', lang)}</label>
-                <input name="empresa" type="text" placeholder={lang === 'es' ? 'Ej. Ocean Foods S.A.' : lang === 'zh' ? '例如：海洋食品公司' : 'e.g. Ocean Foods Inc.'} />
+                <input name="empresa" type="text" placeholder={isEs ? 'Ej. Ocean Foods S.A.' : isZh ? '例如：海洋食品公司' : 'e.g. Ocean Foods Inc.'} />
               </div>
             </div>
 
@@ -65,7 +170,7 @@ const pageTitle = lang === 'es' ? 'Contacto — Pycmar'
               <div class="field">
                 <label>{t('form_country', lang)} <span class="req">*</span></label>
                 <select name="pais" required>
-                  <option value="" disabled selected>{lang === 'es' ? 'Seleccionar…' : lang === 'zh' ? '请选择…' : 'Select…'}</option>
+                  <option value="" disabled selected>{isEs ? 'Seleccionar…' : isZh ? '请选择…' : 'Select…'}</option>
                   {countries.map(c => <option>{c}</option>)}
                 </select>
               </div>
@@ -95,7 +200,7 @@ const pageTitle = lang === 'es' ? 'Contacto — Pycmar'
 
             <div class="field">
               <label>{t('form_message', lang)}</label>
-              <textarea name="mensaje" placeholder={lang === 'es' ? 'Cuéntanos qué productos, formato y destino necesitas…' : lang === 'zh' ? '请告诉我们您需要什么产品、规格和目的地…' : 'Tell us which products, format and destination you need…'}></textarea>
+              <textarea name="mensaje" placeholder={isEs ? 'Cuéntanos qué productos, formato y destino necesitas…' : isZh ? '请告诉我们您需要什么产品、规格和目的地…' : 'Tell us which products, format and destination you need…'}></textarea>
             </div>
 
             <div id="form-error" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:.85em 1em;color:#991b1b;font-size:.9rem;margin-bottom:14px;"></div>
@@ -197,11 +302,85 @@ const pageTitle = lang === 'es' ? 'Contacto — Pycmar'
 </script>
 
 <style>
-  @media(max-width:860px) {
+  /* Company overview band */
+  .about-band {
+    background: var(--navy);
+    padding: clamp(52px, 7vw, 88px) 0;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .about-band-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(28px, 5vw, 64px);
+    align-items: center;
+  }
+  .about-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .about-stat-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: var(--radius);
+    padding: 22px 18px;
+    text-align: center;
+    transition: background .2s;
+  }
+  .about-stat-card:hover { background: rgba(255,255,255,.1); }
+  .about-stat-card .n {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #7ef0c4;
+    letter-spacing: -.03em;
+    line-height: 1;
+  }
+  .about-stat-card .l {
+    font-size: .8rem;
+    color: #8fa6c2;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  /* Values row */
+  .values-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .val-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    transition: .22s var(--ease);
+  }
+  .val-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: transparent; }
+  .val-ic {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: var(--navy);
+    color: #7ef0c4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  /* Form section */
+  @media(max-width:900px) {
+    .about-band-grid { grid-template-columns: 1fr; }
     .contact-grid { grid-template-columns: 1fr !important; }
+    .values-row { grid-template-columns: 1fr 1fr; }
   }
   @media(max-width:560px) {
     .field-row { grid-template-columns: 1fr !important; }
     .seg-radio { flex-direction: column; }
+    .about-stats-grid { grid-template-columns: 1fr 1fr; }
+    .values-row { grid-template-columns: 1fr; }
   }
 </style>

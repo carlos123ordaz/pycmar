@@ -12,14 +12,14 @@ const from = encodeURIComponent(currentPath);
 
 const navLinks = [
   { href: '/',            key: 'nav_home' },
-  { href: '/catalogo',    key: 'nav_catalog' },
-  { href: '/nosotros',    key: 'nav_about' },
   { href: '/exportacion', key: 'nav_export' },
   { href: '/contacto',    key: 'nav_contact' },
 ];
 
 const isActive = (href: string) =>
   href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+
+const adminLabel = lang === 'zh' ? '管理员' : lang === 'en' ? 'Admin Portal' : 'Portal Admin';
 ---
 
 <!-- Announce bar -->
@@ -63,12 +63,44 @@ const isActive = (href: string) =>
     <!-- Actions -->
     <div class="header-actions">
 
-      <!-- Lang toggle -->
-      <div class="lang-toggle" role="group" aria-label="Language">
-        <a href={`/api/lang?lang=es&from=${from}`} class:list={[{ on: lang === 'es' }]}>ES</a>
-        <a href={`/api/lang?lang=en&from=${from}`} class:list={[{ on: lang === 'en' }]}>EN</a>
-        <a href={`/api/lang?lang=zh&from=${from}`} class:list={[{ on: lang === 'zh' }]}>中文</a>
+      <!-- Lang dropdown (globe icon) -->
+      <div class="lang-dropdown" id="lang-dropdown">
+        <button class="icon-btn lang-globe-btn" id="lang-globe-btn" aria-label="Language" aria-expanded="false" aria-haspopup="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+          </svg>
+          <span class="lang-label">{lang === 'zh' ? '中' : lang.toUpperCase()}</span>
+        </button>
+        <div class="lang-menu" id="lang-menu" role="menu">
+          <a href={`/api/lang?lang=es&from=${from}`} class:list={[{ on: lang === 'es' }]} role="menuitem">
+            <span class="lf">🇵🇪</span>
+            <span>Español</span>
+            {lang === 'es' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="13" height="13" style="margin-left:auto"><path d="M20 6L9 17l-5-5"/></svg>}
+          </a>
+          <a href={`/api/lang?lang=en&from=${from}`} class:list={[{ on: lang === 'en' }]} role="menuitem">
+            <span class="lf">🇺🇸</span>
+            <span>English</span>
+            {lang === 'en' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="13" height="13" style="margin-left:auto"><path d="M20 6L9 17l-5-5"/></svg>}
+          </a>
+          <a href={`/api/lang?lang=zh&from=${from}`} class:list={[{ on: lang === 'zh' }]} role="menuitem">
+            <span class="lf">🇨🇳</span>
+            <span>中文</span>
+            {lang === 'zh' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="13" height="13" style="margin-left:auto"><path d="M20 6L9 17l-5-5"/></svg>}
+          </a>
+        </div>
       </div>
+
+      <!-- Admin portal -->
+      <a href="https://admin-pycmar.vercel.app" target="_blank" rel="noopener noreferrer" class="icon-btn admin-link" title={adminLabel} aria-label={adminLabel}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </a>
 
       <!-- Cart -->
       <button class="icon-btn" id="cart-open-btn" aria-label="Cart">
@@ -94,7 +126,7 @@ const isActive = (href: string) =>
 </header>
 
 <!-- Mobile menu -->
-<div id="mobile-menu" class="overlay" style="display:none;" id="mobile-overlay">
+<div id="mobile-menu" class="overlay" style="display:none;">
   <div class="drawer" style="width:min(360px,100vw);" onclick="event.stopPropagation()">
     <div class="drawer-head">
       <a href="/" class="logo">
@@ -117,14 +149,41 @@ const isActive = (href: string) =>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
           </a>
         ))}
+        <a
+          href="/admin"
+          style="padding:14px 6px;font-size:1.1rem;font-weight:700;border-bottom:1px solid var(--line);color:var(--navy);display:flex;align-items:center;justify-content:space-between;"
+        >
+          {adminLabel}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </a>
       </div>
-      <div style="margin-top:22px;display:flex;gap:8px;">
-        <div class="lang-toggle">
-          <a href={`/api/lang?lang=es&from=${from}`} class:list={[{ on: lang === 'es' }]}>ES</a>
-          <a href={`/api/lang?lang=en&from=${from}`} class:list={[{ on: lang === 'en' }]}>EN</a>
-          <a href={`/api/lang?lang=zh&from=${from}`} class:list={[{ on: lang === 'zh' }]}>中文</a>
+
+      <!-- Language selector -->
+      <div style="margin-top:22px;">
+        <div style="font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+          </svg>
+          {lang === 'zh' ? '语言' : lang === 'en' ? 'Language' : 'Idioma'}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a href={`/api/lang?lang=es&from=${from}`}
+             class:list={['lang-mb', { 'lang-mb-on': lang === 'es' }]}>
+            🇵🇪 ES
+          </a>
+          <a href={`/api/lang?lang=en&from=${from}`}
+             class:list={['lang-mb', { 'lang-mb-on': lang === 'en' }]}>
+            🇺🇸 EN
+          </a>
+          <a href={`/api/lang?lang=zh&from=${from}`}
+             class:list={['lang-mb', { 'lang-mb-on': lang === 'zh' }]}>
+            🇨🇳 中
+          </a>
         </div>
       </div>
+
       <a
         class="btn btn-wa btn-block"
         style="margin-top:20px;"
@@ -140,7 +199,15 @@ const isActive = (href: string) =>
 </div>
 
 <script>
-  // Cart bounce on fly-to-cart arrival
+  // Header scroll effect
+  const header = document.getElementById('site-header');
+  if (header) {
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+  }
+
+  // Cart bounce
   document.addEventListener('cart-bounce', () => {
     const btn = document.getElementById('cart-open-btn');
     if (!btn) return;
@@ -161,7 +228,25 @@ const isActive = (href: string) =>
     if (e.target === this) (this as HTMLElement).style.display = 'none';
   });
 
-  // ── Live search ──────────────────────────────────────────────────────────
+  // Lang dropdown
+  const langDropdown = document.getElementById('lang-dropdown');
+  const langGlobeBtn = document.getElementById('lang-globe-btn');
+
+  langGlobeBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = langDropdown?.classList.contains('open');
+    langDropdown?.classList.toggle('open');
+    langGlobeBtn.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!langDropdown?.contains(e.target as Node)) {
+      langDropdown?.classList.remove('open');
+      langGlobeBtn?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Live search
   const searchInput   = document.getElementById('search-input') as HTMLInputElement | null;
   const searchResults = document.getElementById('search-results') as HTMLElement | null;
 
@@ -213,7 +298,6 @@ const isActive = (href: string) =>
       if (e.key === 'Escape') { hideResults(); searchInput.blur(); }
     });
 
-    // Cerrar al hacer click fuera
     document.addEventListener('click', (e) => {
       if (!searchInput.closest('.search-wrap')?.contains(e.target as Node)) hideResults();
     });
@@ -228,17 +312,98 @@ const isActive = (href: string) =>
     78%  { transform: scale(1.12); }
     100% { transform: scale(1); }
   }
-
   #cart-open-btn.cart-popping {
     animation: cart-pop 0.42s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  /* ── Lang dropdown ────────────────────────────── */
+  .lang-dropdown { position: relative; }
+
+  .lang-globe-btn {
+    display: flex !important;
+    align-items: center;
+    gap: 5px;
+    padding: 0 10px !important;
+    width: auto !important;
+  }
+  .lang-label {
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    line-height: 1;
+  }
+
+  .lang-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 152px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px) scale(.97);
+    pointer-events: none;
+    transition: opacity .15s var(--ease), transform .15s var(--ease);
+    z-index: 200;
+  }
+  .lang-dropdown.open .lang-menu {
+    opacity: 1;
+    transform: none;
+    pointer-events: all;
+  }
+  .lang-menu a {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--navy);
+    transition: background .1s;
+    text-decoration: none;
+  }
+  .lang-menu a:hover { background: var(--mist); }
+  .lang-menu a.on { color: var(--accent-600); background: var(--accent-050); }
+  .lf { font-size: 1.1rem; line-height: 1; }
+
+  /* ── Admin link ───────────────────────────────── */
+  .admin-link {
+    border: 1.5px solid var(--line-2) !important;
+    color: var(--gray) !important;
+  }
+  .admin-link:hover {
+    border-color: var(--navy) !important;
+    background: var(--mist) !important;
+    color: var(--navy) !important;
+  }
+
+  /* ── Mobile lang buttons ──────────────────────── */
+  .lang-mb {
+    padding: 8px 13px;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: .88rem;
+    border: 1.5px solid var(--line-2);
+    background: #fff;
+    color: var(--gray);
+    text-decoration: none;
+    transition: .16s;
+  }
+  .lang-mb:hover { border-color: var(--navy); color: var(--navy); }
+  .lang-mb-on {
+    border-color: var(--accent-600) !important;
+    background: var(--accent-050) !important;
+    color: var(--accent-600) !important;
   }
 
   @media(max-width:900px) {
     .nav { display: none; }
     .search-wrap { display: none; }
     .hamburger { display: flex !important; }
-  }
-  @media(max-width:640px) {
-    .lang-toggle { display: none; }
+    .lang-dropdown { display: none !important; }
+    .admin-link { display: none !important; }
   }
 </style>

@@ -2,32 +2,67 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { createSupabaseServer, getImageUrl } from '../lib/supabase';
-import { t, markets, certs, pName, catName, catDesc } from '../lib/i18n';
+import { t, markets, certs, catName } from '../lib/i18n';
 import type { Product, Category } from '../lib/types';
 
 const lang = Astro.locals.lang;
 const supabase = createSupabaseServer(Astro.cookies);
 
-const [{ data: featuredData }, { data: categoriesData }, { data: countData }] = await Promise.all([
-  supabase.from('products').select('*, images:product_images(*), category:categories(name_es,name_en,slug)')
-    .eq('featured', true).eq('active', true).order('name_es').limit(8),
+const [{ data: allProductsData }, { data: categoriesData }] = await Promise.all([
+  supabase.from('products')
+    .select('*, images:product_images(*), category:categories(name_es,name_en,name_zh,slug)')
+    .eq('active', true)
+    .order('featured', { ascending: false }),
   supabase.from('categories').select('*').order('order_index'),
-  supabase.from('products').select('category_id').eq('active', true),
 ]);
 
-const featured: Product[] = featuredData ?? [];
 const cats: Category[] = categoriesData ?? [];
+const allProducts: Product[] = allProductsData ?? [];
 
-// Product count per category
-const productCounts = (countData ?? []).reduce((acc: Record<string, number>, p: any) => {
-  acc[p.category_id] = (acc[p.category_id] || 0) + 1;
-  return acc;
-}, {} as Record<string, number>);
+// Map category slug → image URL
+const catImageMap: Record<string, string> = {};
+for (const c of cats) {
+  if (c.image_url) catImageMap[c.slug] = getImageUrl('category-images', c.image_url);
+}
 
-// Prototype order: pota(0/span2), marisco(3), pescado(2), calamar(1), preparados(5) — skip ovas(4)
-const catOrder = ['pota','marisco','pescado','calamar','preparados'];
-const homeCats = catOrder.map(slug => cats.find(c => c.slug === slug)).filter(Boolean) as Category[];
-const displayCats = homeCats.length > 0 ? homeCats : cats.slice(0, 5);
+// Product count per category (for filter chips)
+const countByCat: Record<string, number> = {};
+for (const p of allProducts) {
+  const slug = (p.category as any)?.slug ?? '';
+  if (slug) countByCat[slug] = (countByCat[slug] || 0) + 1;
+}
+
+// Hero slides — 3 featured categories with curated images
+const heroSlides = [
+  {
+    cat: 'pota',
+    heroImg: '/hero/hero-pota.jpg',
+    kicker: lang === 'es' ? 'Línea estrella' : lang === 'en' ? 'Flagship line' : '明星产品',
+    title:  lang === 'es' ? 'Pota del Pacífico' : lang === 'en' ? 'Pacific Giant Squid' : '太平洋巨型鱿鱼',
+    sub:    lang === 'es' ? 'Botones, anillas, filetes y rabas.' : lang === 'en' ? 'Buttons, rings, fillets and sticks.' : '按钮、环形、鱼片和鱼条。',
+    cta:    lang === 'es' ? 'Ver pota' : lang === 'en' ? 'View squid' : '查看',
+  },
+  {
+    cat: 'marisco',
+    heroImg: '/hero/hero-mariscos.jpg',
+    kicker: lang === 'es' ? 'Selección premium' : lang === 'en' ? 'Premium selection' : '精选产品',
+    title:  lang === 'es' ? 'Mariscos del norte' : lang === 'en' ? 'Northern shellfish' : '北部贝类',
+    sub:    lang === 'es' ? 'Concha de abanico, pulpo y langosta.' : lang === 'en' ? 'Scallops, octopus and lobster.' : '扇贝、章鱼和龙虾。',
+    cta:    lang === 'es' ? 'Ver mariscos' : lang === 'en' ? 'View shellfish' : '查看',
+  },
+  {
+    cat: 'pescado',
+    heroImg: '/hero/hero-pescados.jpg',
+    kicker: lang === 'es' ? 'Pesca del día' : lang === 'en' ? 'Catch of the day' : '当日捕鱼',
+    title:  lang === 'es' ? 'Pescados congelados' : lang === 'en' ? 'Frozen fish' : '冷冻鱼类',
+    sub:    lang === 'es' ? 'Perico, merluza, bonito y más.' : lang === 'en' ? 'Mahi, hake, bonito and more.' : '鲯鳅、无须鳕等。',
+    cta:    lang === 'es' ? 'Ver pescados' : lang === 'en' ? 'View fish' : '查看',
+  },
+];
+
+const certsList = certs[lang];
+const coldLabel = lang === 'es' ? 'cadena de frío' : lang === 'en' ? 'cold chain' : '冷链';
+const allLabel  = lang === 'es' ? 'Todos' : lang === 'en' ? 'All' : '全部';
 
 const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Productos Hidrobiológicos'
   : lang === 'en' ? 'PYCMAR EXPORT PERU S.A.C. - Hydrobiological Products Export'
@@ -36,103 +71,139 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
 
 <BaseLayout title={title}>
 
-  <!-- ── HERO ─────────────────────────────────────────────────────── -->
-  <section class="hero">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto">
-      <source src="/hero-video.mp4" type="video/mp4" />
-    </video>
-    <div class="wrap">
-      <div class="hero-copy fade-up">
-        <span class="eyebrow on-dark">{t('hero_eyebrow', lang)}</span>
-        <h1 class="display">
-          {t('hero_title_1', lang)} <em>{t('hero_title_em', lang)}</em>{t('hero_title_2', lang)}
-        </h1>
-        <p class="lead">{t('hero_sub', lang)}</p>
-        <div class="hero-cta">
-          <a href="/catalogo" class="btn btn-accent btn-lg">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            {t('cta_catalog', lang)}
-          </a>
-          <a href="/contacto" class="btn btn-ghost-light btn-lg">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            {t('cta_quote', lang)}
-          </a>
-        </div>
-        <div class="hero-stats">
-          {[['35+', t('stat_species', lang)], ['6', t('stat_markets', lang)], ['−18°C', t('stat_cold', lang)], ['100%', t('stat_years', lang)]].map(([n, l]) => (
-            <div class="hero-stat">
-              <div class="n">{n}</div>
-              <div class="l">{l}</div>
+  <!-- ══ HERO SLIDER ══════════════════════════════════════════════════════ -->
+  <section class="heroF" id="heroF">
+    <div class="heroF-slides" id="heroF-slides">
+      {heroSlides.map((slide, idx) => (
+          <div class="heroF-slide">
+            <img
+              class="heroF-bg"
+              src={slide.heroImg}
+              alt={slide.title}
+              loading={idx === 0 ? 'eager' : 'lazy'}
+            />
+            <span class="heroF-scrim" />
+            <div class="wrap heroF-inner">
+              <div class="heroF-copy">
+                <span class="heroF-kicker">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>
+                  {slide.kicker}
+                </span>
+                <h1 class="heroF-title">{slide.title}</h1>
+                <p class="heroF-sub">{slide.sub}</p>
+                <button class="btn btn-accent btn-lg heroF-cta" data-cat={slide.cat}>
+                  {slide.cta}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        ))}
     </div>
 
-    <!-- Marquee / certs bar -->
-    <div class="wrap">
-      <div class="hero-marquee">
-        <span><b>{t('certifications', lang)}:</b></span>
-        {certs[lang].map((c, i) => (
-          <>
-            <span>{c}</span>
-            {i < certs[lang].length - 1 && <span class="sep">›</span>}
-          </>
-        ))}
-      </div>
+    <button class="heroF-arrow heroF-left" id="heroF-prev" aria-label="anterior">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+    <button class="heroF-arrow heroF-right" id="heroF-next" aria-label="siguiente">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+
+    <div class="heroF-dots" id="heroF-dots">
+      {heroSlides.map((_, k) => (
+        <button class={`heroF-dot${k === 0 ? ' on' : ''}`} aria-label={`slide ${k + 1}`} data-slide={k} />
+      ))}
+    </div>
+
+    <div class="heroF-badge">
+      <b>−18°C</b>
+      <span>{coldLabel}</span>
+    </div>
+
+    <!-- Cert strip — inside hero so queda dentro del 100vh -->
+    <div class="heroF-certs">
+      <span class="heroF-certs-lbl">{t('certifications', lang)}</span>
+      {certsList.map((c, k) => (
+        <Fragment>
+          {k > 0 && (
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity:.4;flex:none;color:var(--accent)"><path d="M9 18l6-6-6-6"/></svg>
+          )}
+          <span class="heroF-certs-item">{c}</span>
+        </Fragment>
+      ))}
     </div>
   </section>
 
-  <!-- ── CATEGORIES ────────────────────────────────────────────────── -->
-  <section class="section">
+  <!-- ══ CATÁLOGO + FILTROS ════════════════════════════════════════════════ -->
+  <section class="section-tight" id="productos">
     <div class="wrap">
-      <div class="sec-head">
-        <span class="eyebrow">{t('cats_title', lang)}</span>
-        <h2 class="h2" style="margin-top:14px;">{t('cats_heading', lang)}</h2>
-        <p>{t('cats_sub', lang)}</p>
+
+      <div class="shop-head">
+        <div>
+          <span class="eyebrow" style="display:block;margin-bottom:10px;">{t('featured_title', lang)}</span>
+          <h2 class="h2">{t('featured_heading', lang)}</h2>
+        </div>
+        <span class="shop-count">
+          <b id="prod-count">{allProducts.length}</b> {t('catalog_count', lang)}
+        </span>
       </div>
 
-      <div class="cat-grid">
-        {displayCats.map((cat, idx) => {
-          const count = productCounts[cat.id] ?? 0;
-          const countLabel = lang === 'zh' ? `${count} 个产品` : lang === 'en' ? `${count} products` : `${count} productos`;
+      <!-- Category filter chips -->
+      <div class="catfilter" id="catfilter">
+        <button class="catfilter-chip on" data-cat="all">
+          <span class="catfilter-ic">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </span>
+          <span class="catfilter-lbl">{allLabel}</span>
+          <span class="catfilter-ct">{allProducts.length}</span>
+        </button>
+        {cats.map(cat => {
+          const count = countByCat[cat.slug] ?? 0;
+          if (count === 0) return null;
           return (
-            <a
-              href={`/catalogo?categoria=${cat.slug}`}
-              class:list={['cat-card', { span2: idx === 0 }]}
-              style="text-decoration:none;"
-            >
-              {cat.image_url
-                ? <img src={getImageUrl('category-images', cat.image_url)} alt={catName(cat, lang)} />
-                : <div class="ph" style="position:absolute;inset:0;z-index:-2;border-radius:0;"></div>
-              }
-              <div class="body">
-                <div class="count">{countLabel}</div>
-                <h3 style={idx === 0 ? 'font-size:1.9rem;' : ''}>{catName(cat, lang)}</h3>
-                <div class="d">{catDesc(cat, lang)}</div>
-                <div class="go">
-                  {lang === 'zh' ? '探索' : lang === 'en' ? 'Explore' : 'Explorar'}
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-              </div>
-            </a>
+            <button class="catfilter-chip" data-cat={cat.slug}>
+              <span class="catfilter-ic">
+                {cat.image_url
+                  ? <img src={catImageMap[cat.slug]} alt={catName(cat, lang)} style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+                  : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 8v4M12 16h.01"/></svg>
+                }
+              </span>
+              <span class="catfilter-lbl">{catName(cat, lang)}</span>
+              <span class="catfilter-ct">{count}</span>
+            </button>
           );
         })}
       </div>
 
-      <div style="margin-top:30px;text-align:center;">
-        <a href="/catalogo" class="btn btn-outline btn-lg">
-          {t('cats_all', lang)}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
+      <!-- Products grid -->
+      {allProducts.length === 0 ? (
+        <div class="center" style="padding:60px 0;color:var(--gray);">
+          <p>{t('no_results', lang)}</p>
+        </div>
+      ) : (
+        <div class="prod-grid home-grid" id="prod-grid">
+          {allProducts.map((p, idx) => (
+            <div class={`prod-item${idx >= 8 ? ' hidden' : ''}`} data-cat={(p.category as any)?.slug ?? ''} data-idx={idx}>
+              <ProductCard product={p} lang={lang} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div class="center" style="margin-top:44px;" id="ver-mas-wrap">
+        <button id="ver-mas-btn" class="btn btn-outline btn-lg">
+          {lang === 'es' ? 'Ver más' : lang === 'en' ? 'See more' : '查看更多'}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </button>
       </div>
+
     </div>
   </section>
 
-  <!-- ── BENEFITS ──────────────────────────────────────────────────── -->
+  <!-- ══ BENEFICIOS ═══════════════════════════════════════════════════════ -->
   <section class="section bene">
     <div class="wrap">
-      <div class="sec-head">
+      <div class="sec-head center">
         <span class="eyebrow">{t('benefits_title', lang)}</span>
         <h2 class="h2" style="margin-top:14px;">{t('benefits_heading', lang)}</h2>
         <p>{t('benefits_sub', lang)}</p>
@@ -160,28 +231,7 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
     </div>
   </section>
 
-  <!-- ── FEATURED PRODUCTS ─────────────────────────────────────────── -->
-  {featured.length > 0 && (
-    <section class="section">
-      <div class="wrap">
-        <div class="catalog-bar" style="margin-bottom:34px;">
-          <div>
-            <span class="eyebrow" style="display:block;margin-bottom:10px;">{t('featured_title', lang)}</span>
-            <h2 class="h2">{t('featured_heading', lang)}</h2>
-          </div>
-          <a href="/catalogo" class="btn btn-outline">
-            {t('cats_all', lang)}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-        <div class="prod-grid">
-          {featured.map(p => <ProductCard product={p} lang={lang} />)}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- ── TRUST / CERTS ─────────────────────────────────────────────── -->
+  <!-- ══ CONFIANZA / CERTIFICACIONES ══════════════════════════════════════ -->
   <section class="section trust">
     <div class="wrap">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,5vw,72px);align-items:center;" class="trust-grid">
@@ -210,7 +260,7 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
     </div>
   </section>
 
-  <!-- ── CTA BAND ──────────────────────────────────────────────────── -->
+  <!-- ══ BANDA CTA ════════════════════════════════════════════════════════ -->
   <section class="section-tight">
     <div class="wrap">
       <div class="cta-band">
@@ -239,16 +289,429 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
 </BaseLayout>
 
 <style>
-  @media(max-width:900px) {
-    .hero-grid { grid-template-columns: 1fr !important; }
-    .hero-visual { display: none; }
-    .bene-grid { grid-template-columns: repeat(2,1fr) !important; }
-    .trust-grid { grid-template-columns: 1fr !important; }
+  /* ══ HERO SLIDER (heroF) ═════════════════════════════════════════════════ */
+  .heroF {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--navy);
+    /* JS sobreescribe con el alto exacto disponible bajo el header */
+    height: calc(100vh - var(--header-h));
+    min-height: 480px;
   }
-  @media(max-width:640px) {
-    .cat-grid { grid-template-columns: 1fr 1fr !important; }
-    .cat-card.span2 { grid-column: span 2; }
-    .prod-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .heroF-slides {
+    display: flex;
+    height: 100%;
+    transition: transform .65s cubic-bezier(.22,.61,.36,1);
+  }
+  .heroF-slide {
+    position: relative;
+    flex: 0 0 100%;
+    height: 100%;
+  }
+  .heroF-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .heroF-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      rgba(8,22,42,.88) 0%,
+      rgba(8,22,42,.65) 38%,
+      rgba(8,22,42,.18) 70%,
+      rgba(8,22,42,0) 100%
+    );
+  }
+  .heroF-inner {
+    position: relative;
+    z-index: 3;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .heroF-copy {
+    max-width: 36rem;
+    color: #fff;
+  }
+  .heroF-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .heroF-kicker svg { opacity: .8; }
+  .heroF-title {
+    font-size: clamp(2.2rem, 4.8vw, 4.2rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.04;
+    color: #fff;
+    margin: 14px 0 0;
+    text-shadow: 0 2px 24px rgba(0,0,0,.35);
+  }
+  .heroF-sub {
+    font-size: clamp(1rem, 1.55vw, 1.28rem);
+    line-height: 1.5;
+    color: #d4e2f2;
+    margin: 18px 0 28px;
+    max-width: 34ch;
+  }
+
+  /* Arrows */
+  .heroF-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,.35);
+    background: rgba(8,22,42,.4);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .2s var(--ease);
+  }
+  .heroF-arrow:hover {
+    background: var(--accent);
+    color: #052e2e;
+    border-color: var(--accent);
+  }
+  .heroF-left  { left:  clamp(14px, 2.5vw, 40px); }
+  .heroF-right { right: clamp(14px, 2.5vw, 40px); }
+
+  /* Dots */
+  .heroF-dots {
+    position: absolute;
+    bottom: 72px;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .heroF-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,.4);
+    transition: .25s var(--ease);
+    padding: 0;
+    cursor: pointer;
+  }
+  .heroF-dot.on {
+    background: var(--accent);
+    width: 30px;
+    border-radius: 5px;
+  }
+
+  /* Badge −18°C */
+  .heroF-badge {
+    position: absolute;
+    right: clamp(16px, 3vw, 48px);
+    top: clamp(20px, 3vw, 40px);
+    z-index: 5;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #052e2e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    transform: rotate(-7deg);
+  }
+  .heroF-badge b   { font-size: 1.28rem; font-weight: 800; letter-spacing: -.03em; }
+  .heroF-badge span { font-size: .59rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; text-align: center; line-height: 1.1; margin-top: 2px; }
+
+  @media(max-width: 680px) {
+    .heroF { min-height: 480px; } /* JS maneja el alto exacto en móvil también */
+    .heroF-scrim { background: linear-gradient(to top, rgba(8,22,42,.9) 0%, rgba(8,22,42,.5) 45%, rgba(8,22,42,.2) 100%); }
+    .heroF-inner { align-items: flex-end; padding-bottom: 120px; }
+    .heroF-badge { width: 74px; height: 74px; }
+    .heroF-badge b { font-size: 1rem; }
+    .heroF-arrow { width: 42px; height: 42px; }
+    .heroF-certs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .heroF-certs::-webkit-scrollbar { display: none; }
+  }
+
+  /* ══ CERT STRIP (dentro del hero) ═══════════════════════════════════════ */
+  .heroF-certs {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    padding: 14px clamp(16px, 4vw, 60px);
+    background: rgba(5, 15, 30, .72);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .heroF-certs-lbl {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+  .heroF-certs-item {
+    font-size: .88rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.82);
+    white-space: nowrap;
+  }
+
+  /* ══ SHOP HEAD ══════════════════════════════════════════════════════════ */
+  .shop-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .shop-count { font-size: .95rem; color: var(--gray); }
+  .shop-count b { color: var(--navy); font-weight: 800; font-size: 1.1rem; }
+
+  /* ══ CATEGORY FILTER CHIPS ══════════════════════════════════════════════ */
+  .catfilter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .catfilter-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px 10px 10px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line-2);
+    background: #fff;
+    color: var(--navy);
+    cursor: pointer;
+    transition: .2s var(--ease);
+    font-family: inherit;
+  }
+  .catfilter-chip:hover {
+    border-color: var(--navy);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .catfilter-ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--mist);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--navy);
+    overflow: hidden;
+    flex: none;
+    transition: .2s;
+  }
+  .catfilter-ic svg { width: 19px; height: 19px; }
+  .catfilter-lbl {
+    font-size: .97rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+  }
+  .catfilter-ct {
+    font-size: .74rem;
+    font-weight: 700;
+    color: var(--gray-2);
+    background: var(--mist);
+    border-radius: 999px;
+    padding: 2px 8px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .catfilter-chip.on {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+  .catfilter-chip.on .catfilter-ic { background: var(--accent); color: #052e2e; }
+  .catfilter-chip.on .catfilter-ct { background: rgba(255,255,255,.16); color: #fff; }
+
+  @media(max-width: 768px) {
+    .catfilter {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 6px;
+    }
+    .catfilter::-webkit-scrollbar { display: none; }
+    .catfilter-chip { flex-shrink: 0; }
+  }
+  @media(max-width: 520px) {
+    .catfilter-chip { padding: 8px 14px 8px 8px; gap: 8px; }
+    .catfilter-ic   { width: 30px; height: 30px; }
+    .catfilter-ic svg { width: 16px; height: 16px; }
+    .catfilter-lbl  { font-size: .88rem; }
+  }
+
+  /* ══ PRODUCT GRID (home) ════════════════════════════════════════════════ */
+  .home-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .prod-item { display: contents; }
+  .prod-item.hidden { display: none; }
+
+  @media(max-width: 1100px) { .home-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media(max-width: 680px)  { .home-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ══ RESPONSIVE trust ════════════════════════════════════════════════════ */
+  @media(max-width: 900px) {
+    .trust-grid { grid-template-columns: 1fr !important; }
+    .bene-grid  { grid-template-columns: repeat(2,1fr) !important; }
+  }
+  @media(max-width: 640px) {
     .bene-grid { grid-template-columns: 1fr !important; }
   }
+
+  /* Respeta preferencia de movimiento reducido */
+  @media(prefers-reduced-motion: reduce) {
+    .heroF-slides { transition: none; }
+  }
 </style>
+
+<script>
+  // ── Hero: altura exacta = viewport menos lo que ocupa encima del hero ────
+  (function () {
+    const hero = document.getElementById('heroF') as HTMLElement | null;
+    if (!hero) return;
+    function fitHero() {
+      const top = hero!.getBoundingClientRect().top + window.scrollY; // offsetTop real
+      const h = Math.max(480, window.innerHeight - top);
+      hero!.style.height = h + 'px';
+    }
+    fitHero();
+    window.addEventListener('resize', fitHero, { passive: true });
+  })();
+
+  // ── Hero slider ──────────────────────────────────────────────────────────
+  (function () {
+    const track = document.getElementById('heroF-slides') as HTMLElement | null;
+    const dotsEl = document.querySelectorAll<HTMLButtonElement>('#heroF-dots .heroF-dot');
+    const n = dotsEl.length;
+    if (!track || n === 0) return;
+
+    let cur = 0;
+    let timer: ReturnType<typeof setInterval>;
+
+    function go(idx: number) {
+      cur = ((idx % n) + n) % n;
+      track!.style.transform = `translateX(-${cur * 100}%)`;
+      dotsEl.forEach((d, i) => d.classList.toggle('on', i === cur));
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => go(cur + 1), 6500);
+    }
+
+    document.getElementById('heroF-prev')?.addEventListener('click', () => { go(cur - 1); startTimer(); });
+    document.getElementById('heroF-next')?.addEventListener('click', () => { go(cur + 1); startTimer(); });
+    dotsEl.forEach(d => d.addEventListener('click', () => { go(Number(d.dataset.slide)); startTimer(); }));
+
+    startTimer();
+  })();
+
+  // ── Category filter + Ver más ────────────────────────────────────────────
+  (function () {
+    const chips = document.querySelectorAll<HTMLButtonElement>('#catfilter .catfilter-chip');
+    const items = document.querySelectorAll<HTMLElement>('#prod-grid .prod-item');
+    const countEl = document.getElementById('prod-count');
+    const verMasWrap = document.getElementById('ver-mas-wrap');
+
+    const LIMIT = 8;
+    let showAll = false;
+    let currentCat = 'all';
+
+    function applyFilter(cat: string) {
+      let visible = 0;
+      items.forEach(item => {
+        const catMatch = cat === 'all' || item.dataset.cat === cat;
+        const idx = parseInt(item.dataset.idx ?? '0', 10);
+        const withinLimit = cat !== 'all' || showAll || idx < LIMIT;
+        const show = catMatch && withinLimit;
+        item.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      if (countEl) countEl.textContent = String(visible);
+
+      // Show "Ver más" only when viewing all and there are hidden items
+      if (verMasWrap) {
+        const hasMore = cat === 'all' && !showAll && items.length > LIMIT;
+        verMasWrap.style.display = hasMore ? '' : 'none';
+      }
+    }
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('on'));
+        chip.classList.add('on');
+        currentCat = chip.dataset.cat ?? 'all';
+        applyFilter(currentCat);
+
+        const grid = document.getElementById('prod-grid');
+        if (grid) {
+          const top = grid.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+
+    document.getElementById('ver-mas-btn')?.addEventListener('click', () => {
+      showAll = true;
+      applyFilter(currentCat);
+    });
+
+    // Hero CTA buttons → filter by category and scroll to products
+    document.querySelectorAll<HTMLButtonElement>('.heroF-cta').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        if (!cat) return;
+        const chip = document.querySelector<HTMLButtonElement>(`#catfilter .catfilter-chip[data-cat="${cat}"]`);
+        if (chip) chip.click();
+        else {
+          const sec = document.getElementById('productos');
+          if (sec) window.scrollTo({ top: sec.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Init
+    applyFilter('all');
+  })();
+</script>
