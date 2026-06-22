@@ -207,7 +207,7 @@ const adminLabel = lang === 'zh' ? '管理员' : lang === 'en' ? 'Admin Portal' 
     }, { passive: true });
   }
 
-  // Cart bounce
+  // Cart bounce — se dispara al agregar un producto
   document.addEventListener('cart-bounce', () => {
     const btn = document.getElementById('cart-open-btn');
     if (!btn) return;
@@ -216,6 +216,22 @@ const adminLabel = lang === 'zh' ? '管理员' : lang === 'en' ? 'Admin Portal' 
     btn.classList.add('cart-popping');
     btn.addEventListener('animationend', () => btn.classList.remove('cart-popping'), { once: true });
   });
+
+  // Cart jump periódico — recuerda al usuario que tiene productos en el carrito
+  (function () {
+    function jump() {
+      const badge = document.getElementById('cart-count');
+      if (!badge || badge.style.display === 'none') return; // carrito vacío, no saltar
+      const btn = document.getElementById('cart-open-btn');
+      if (!btn) return;
+      btn.classList.remove('cart-jumping');
+      void (btn as HTMLElement).offsetWidth;
+      btn.classList.add('cart-jumping');
+      btn.addEventListener('animationend', () => btn.classList.remove('cart-jumping'), { once: true });
+    }
+    // Primer salto a los 4s, luego cada 8s
+    setTimeout(() => { jump(); setInterval(jump, 8000); }, 4000);
+  })();
 
   // Mobile menu
   document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
@@ -314,6 +330,19 @@ const adminLabel = lang === 'zh' ? '管理员' : lang === 'en' ? 'Admin Portal' 
   }
   #cart-open-btn.cart-popping {
     animation: cart-pop 0.42s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  @keyframes cart-jump {
+    0%        { transform: translateY(0)    rotate(0deg);  }
+    18%       { transform: translateY(-11px) rotate(-6deg); }
+    36%       { transform: translateY(0)    rotate(0deg);  }
+    50%       { transform: translateY(-6px)  rotate(4deg);  }
+    64%       { transform: translateY(0)    rotate(0deg);  }
+    74%       { transform: translateY(-3px)  rotate(-2deg); }
+    88%, 100% { transform: translateY(0)    rotate(0deg);  }
+  }
+  #cart-open-btn.cart-jumping {
+    animation: cart-jump 0.85s cubic-bezier(.36,.07,.19,.97) both;
   }
 
   /* ── Lang dropdown ────────────────────────────── */

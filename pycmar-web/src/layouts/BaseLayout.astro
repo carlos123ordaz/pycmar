@@ -136,6 +136,17 @@ const jsonLd = {
         hdr.classList.toggle('scrolled', window.scrollY > 8);
       }, { passive: true });
     }
+
+    // Scroll-reveal: activa .visible cuando el elemento entra al viewport
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
   </script>
 </body>
 </html>
