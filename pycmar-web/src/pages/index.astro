@@ -62,7 +62,6 @@ const heroSlides = [
 
 const certsList = certs[lang];
 const coldLabel = lang === 'es' ? 'cadena de frío' : lang === 'en' ? 'cold chain' : '冷链';
-const allLabel  = lang === 'es' ? 'Todos' : lang === 'en' ? 'All' : '全部';
 
 const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Productos Hidrobiológicos'
   : lang === 'en' ? 'PYCMAR EXPORT PERU S.A.C. - Hydrobiological Products Export'
@@ -176,13 +175,6 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
 
       <!-- Category filter chips -->
       <div class="catfilter" id="catfilter">
-        <button class="catfilter-chip on" data-cat="all">
-          <span class="catfilter-ic">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          </span>
-          <span class="catfilter-lbl">{allLabel}</span>
-          <span class="catfilter-ct">{allProducts.length}</span>
-        </button>
         {cats.map(cat => {
           const count = countByCat[cat.slug] ?? 0;
           if (count === 0) return null;
@@ -796,9 +788,20 @@ const title = lang === 'es' ? 'PYCMAR EXPORT PERU S.A.C. - Exportación de Produ
 
     chips.forEach(chip => {
       chip.addEventListener('click', () => {
+        const alreadyOn = chip.classList.contains('on');
+
+        // Deseleccionar todos
         chips.forEach(c => c.classList.remove('on'));
-        chip.classList.add('on');
-        currentCat = chip.dataset.cat ?? 'all';
+
+        if (alreadyOn) {
+          // Toggle off → volver a "todos"
+          currentCat = 'all';
+          showAll = false;
+        } else {
+          chip.classList.add('on');
+          currentCat = chip.dataset.cat ?? 'all';
+        }
+
         applyFilter(currentCat);
 
         const grid = document.getElementById('prod-grid');
